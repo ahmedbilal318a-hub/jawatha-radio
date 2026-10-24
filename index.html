@@ -134,6 +134,9 @@ button.go:disabled{opacity:.5;cursor:not-allowed}
 .strong{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
 .strong:hover{filter:brightness(1.08);border-color:transparent}
 .hint{font-size:.8rem;color:var(--muted);line-height:1.6}
+.more{border-top:1px solid var(--line);padding-top:11px;margin-top:3px}
+.more summary{font-size:.82rem;color:var(--accent);cursor:pointer;font-weight:500}
+.more>*{margin-top:9px}
 
 .pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600;
   background:var(--accent-soft);color:var(--accent)}
@@ -306,16 +309,22 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
             <span class="pill" id="resPill"></span>
           </div>
           <div class="body">
-            <h3>أرسل نتيجتك إلى مشرف الإذاعة</h3>
-            <p class="hint">اضغط «مشاركة النتيجة» واختر أي تطبيق، أو انسخ الرابط أو الرمز وأرسله بأي وسيلة.
-              المشرف يفتح الرابط أو يلصق الرمز، فيُضاف تقييمك إلى المتوسط العام.</p>
-            <div class="codetxt" id="codeTxt"></div>
+            <h3 id="resWho">تم تسجيل التقييم</h3>
+            <p class="hint" id="resHint">التقييم محفوظ على هذا الجهاز وظهر في لوحة النتائج. سلّم الجهاز للمعلم التالي.</p>
             <div class="actions">
-              <button type="button" class="ghost strong" id="shareBtn">مشاركة النتيجة</button>
-              <button type="button" class="ghost" id="linkBtn">نسخ الرابط</button>
-              <button type="button" class="ghost" id="copyBtn">نسخ الرمز</button>
-              <button type="button" class="ghost" id="editBtn">تعديل تقييمي</button>
+              <button type="button" class="ghost strong" id="nextBtn">معلم جديد</button>
+              <button type="button" class="ghost" id="editBtn">تعديل هذا التقييم</button>
             </div>
+            <details class="more">
+              <summary>المعلم قيّم من جواله؟ أرسل النتيجة للمشرف</summary>
+              <p class="hint">المشرف يفتح الرابط فتُضاف النتيجة عنده تلقائيًا، أو يلصق الرمز في لوحة النتائج.</p>
+              <div class="codetxt" id="codeTxt"></div>
+              <div class="actions">
+                <button type="button" class="ghost" id="shareBtn">مشاركة النتيجة</button>
+                <button type="button" class="ghost" id="linkBtn">نسخ الرابط</button>
+                <button type="button" class="ghost" id="copyBtn">نسخ الرمز</button>
+              </div>
+            </details>
           </div>
         </div>
       </div>
@@ -386,6 +395,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       resPill=document.getElementById('resPill'), codeTxt=document.getElementById('codeTxt'),
       shareBtn=document.getElementById('shareBtn'), linkBtn=document.getElementById('linkBtn'),
       copyBtn=document.getElementById('copyBtn'), editBtn=document.getElementById('editBtn'),
+      nextBtn=document.getElementById('nextBtn'), resWho=document.getElementById('resWho'),
       tabCount=document.getElementById('tabCount'), tabForm=document.getElementById('tabForm'),
       tabDash=document.getElementById('tabDash'), panelForm=document.getElementById('panelForm'),
       panelDash=document.getElementById('panelDash'), tabsBox=document.getElementById('tabs'),
@@ -454,6 +464,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     result.hidden=false;
     resSc.textContent=ar(rec.total);
     resPill.textContent=g.t; resPill.setAttribute('data-g',g.g);
+    resWho.textContent='نتيجة '+(rec.teacher||'المعلم');
     var code=encode(rec);
     codeTxt.textContent=code;
     shareLink=location.origin+location.pathname+'#r='+encodeURIComponent(code);
@@ -494,8 +505,17 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   });
   editBtn.addEventListener('click',function(){
     result.hidden=true;toast.hidden=true;
-    submitBtn.textContent='اعتماد التقييم';
     teacher.focus();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  nextBtn.addEventListener('click',function(){
+    CRITERIA.forEach(function(_,i){
+      var el=form.querySelector('input[name="c'+i+'"]:checked');if(el)el.checked=false;
+    });
+    teacher.value='';notes.value='';
+    result.hidden=true;toast.hidden=true;
+    submitBtn.textContent='اعتماد التقييم';
+    refresh();teacher.focus();
     window.scrollTo({top:0,behavior:'smooth'});
   });
 
@@ -522,11 +542,10 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     }
     var rec={teacher:teacher.value.trim(),topic:topic.value.trim(),day:dayInput.value,
       scores:st.a,total:st.total,notes:notes.value.trim()};
-    try{localStorage.setItem(LS+':draft',JSON.stringify(rec));}catch(err){}
-    say('تم اعتماد تقييمك — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
+    addRows([rec]);
+    say('تم تسجيل تقييم '+rec.teacher+' — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
     submitBtn.textContent='تحديث التقييم';
     showResult(rec);
-    if(isAdmin){addRows([rec]);}
   });
 
   dayInput.addEventListener('change',function(){
@@ -575,7 +594,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     if(adminKey.value.trim()!==ADMIN_PASS){
       lockMsg.hidden=false;lockMsg.textContent='الرمز غير صحيح.';lockMsg.style.color='var(--g5)';return;
     }
-    isAdmin=true;records=rowsRead();
+    isAdmin=true;
     try{sessionStorage.setItem(LS+':admin','1');}catch(err){}
     lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
     tabsBox.hidden=false;flushPending();renderDash();show('dash');
@@ -645,10 +664,11 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var all=days();
     tabCount.textContent=records.length?'('+ar(records.length)+')':'';
     if(!records.length){
-      panelDash.innerHTML=pasteCard()+
-        '<section class="card"><div class="card-h"><h2>المتوسط العام</h2></div>'+
+      panelDash.innerHTML=
+        '<section class="card"><div class="card-h"><h2>تقييمات المعلمين</h2></div>'+
         '<div class="card-b"><div class="empty"><span class="ico">◠</span>لا توجد تقييمات بعد.<br>'+
-        'الصق أول رمز وصلك من معلم، فيظهر المتوسط وتفاصيل كل معيار.</div></div></section>';
+        'افتح «استبيان التقييم» وسلّم الجهاز لأول معلم، فتظهر نتيجته هنا فورًا.</div></div></section>'+
+        pasteCard();
       bindPaste();return;
     }
     if(!dashDay||(dashDay!=='all'&&all.indexOf(dashDay)<0))dashDay=all[0];
@@ -658,12 +678,12 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     }).join('')+'<option value="all"'+(dashDay==='all'?' selected':'')+'>كل الأيام معًا</option>';
 
     var tl=dashDay==='all'?'':topicOf(dashDay);
-    var head='<div class="dash-top">'+
+    var pick='<div class="dash-top">'+
       '<label class="f" for="dashDay">اليوم المعروض<select id="dashDay">'+opts+'</select></label>'+
       '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button></div>'+
-      '<p class="ttl">'+(dashDay==='all'?'<span class="ph">متوسط جميع الأيام المسجَّلة</span>':
-        (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>'))+'</p>'+
-      '<dl class="tiles">'+
+      '<p class="ttl">'+(dashDay==='all'?'<span class="ph">كل الأيام المسجَّلة</span>':
+        (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>'))+'</p>';
+    var tiles='<dl class="tiles">'+
       '<div class="tile main"><dt>المتوسط العام</dt><dd>'+ar(avg.toFixed(1))+' <span class="of">من ١٠٠</span></dd>'+
       '<span class="pill">'+g.t+'</span></div>'+
       '<div class="tile"><dt>عدد المعلمين المقيّمين</dt><dd>'+ar(n)+'</dd></div>'+
@@ -702,21 +722,21 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         '<td class="sc" style="color:var(--'+dg.g+')">'+dg.t+'</td></tr>';
     }).join('');
 
-    panelDash.innerHTML=pasteCard()+
-      '<section class="card"><div class="card-h"><h2>المتوسط العام</h2>'+
-        '<span class="note">يُحسب من كل الرموز المضافة</span></div>'+
-        '<div class="card-b">'+head+'</div></section>'+
+    panelDash.innerHTML=
+      '<section class="card"><div class="card-h"><h2>تقييمات المعلمين</h2>'+
+        '<span class="note">اضغط على اسم المعلم لعرض درجاته في المعايير العشرة</span></div>'+
+        '<div class="card-b">'+pick+'<div class="tcards" style="margin-top:14px">'+cards+'</div></div></section>'+
+      '<section class="card"><div class="card-h"><h2>الخلاصة</h2>'+
+        '<span class="note">'+(dashDay==='all'?'لكل الأيام':'لهذا اليوم')+'</span></div>'+
+        '<div class="card-b">'+tiles+'</div></section>'+
       '<section class="card"><div class="card-h"><h2>متوسط كل معيار</h2>'+
         '<span class="note">كل معيار من ١٠ درجات</span></div>'+
         '<div class="card-b"><div class="rows">'+bars+'</div></div></section>'+
-      '<section class="card"><div class="card-h"><h2>نتيجة كل معلم</h2>'+
-        '<span class="note">اضغط على اسم المعلم لعرض درجاته التفصيلية</span></div>'+
-        '<div class="card-b"><div class="tcards">'+cards+'</div></div></section>'+
       '<section class="card"><div class="card-h"><h2>سجل الأيام</h2>'+
         '<span class="note">متوسط كل إذاعة على حدة</span></div>'+
         '<div class="card-b"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>عنوان الإذاعة</th>'+
         '<th>المقيّمون</th><th>المتوسط</th><th>التقدير</th></tr></thead><tbody>'+daysTbl+
-        '</tbody></table></div></div></section>';
+        '</tbody></table></div></div></section>'+pasteCard();
 
     bindPaste();
     var sel=document.getElementById('dashDay');
@@ -780,11 +800,12 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
 
   /* ---------- البداية ---------- */
   refresh();
+  records=rowsRead();
   var incoming=takeHash();
   var wasAdmin='';
   try{wasAdmin=sessionStorage.getItem(LS+':admin')||'';}catch(e){}
   if(wasAdmin==='1'){
-    isAdmin=true;records=rowsRead();lockBtn.hidden=true;tabsBox.hidden=false;
+    isAdmin=true;lockBtn.hidden=true;tabsBox.hidden=false;
     flushPending();renderDash();
     if(incoming)show('dash');
   }else if(incoming){
