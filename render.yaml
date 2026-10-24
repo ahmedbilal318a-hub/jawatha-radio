@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: jawatha-radio
+    runtime: static
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate

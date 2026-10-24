@@ -131,8 +131,8 @@ button.go:disabled{opacity:.5;cursor:not-allowed}
   background:var(--surface-2);border:1px dashed var(--line);border-radius:9px;padding:10px 11px;
   word-break:break-all;line-height:1.6;user-select:all}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.wa{background:#1f9d55;color:#fff;border-color:transparent;font-weight:600}
-.wa:hover{filter:brightness(1.07);border-color:transparent}
+.strong{background:var(--accent);color:var(--on-accent);border-color:transparent;font-weight:600}
+.strong:hover{filter:brightness(1.08);border-color:transparent}
 .hint{font-size:.8rem;color:var(--muted);line-height:1.6}
 
 .pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600;
@@ -306,11 +306,13 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
             <span class="pill" id="resPill"></span>
           </div>
           <div class="body">
-            <h3>أرسل رمز تقييمك إلى مشرف الإذاعة</h3>
-            <p class="hint">المشرف يلزق الرموز في لوحة النتائج فيظهر المتوسط العام فورًا. الرمز يحمل درجاتك واسمك وملاحظتك.</p>
+            <h3>أرسل نتيجتك إلى مشرف الإذاعة</h3>
+            <p class="hint">اضغط «مشاركة النتيجة» واختر أي تطبيق، أو انسخ الرابط أو الرمز وأرسله بأي وسيلة.
+              المشرف يفتح الرابط أو يلصق الرمز، فيُضاف تقييمك إلى المتوسط العام.</p>
             <div class="codetxt" id="codeTxt"></div>
             <div class="actions">
-              <a class="ghost wa" id="waBtn" href="#" target="_blank" rel="noopener">إرسال على واتساب</a>
+              <button type="button" class="ghost strong" id="shareBtn">مشاركة النتيجة</button>
+              <button type="button" class="ghost" id="linkBtn">نسخ الرابط</button>
               <button type="button" class="ghost" id="copyBtn">نسخ الرمز</button>
               <button type="button" class="ghost" id="editBtn">تعديل تقييمي</button>
             </div>
@@ -382,15 +384,15 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       notes=document.getElementById('notes'), toast=document.getElementById('toast'),
       result=document.getElementById('result'), resSc=document.getElementById('resSc'),
       resPill=document.getElementById('resPill'), codeTxt=document.getElementById('codeTxt'),
-      waBtn=document.getElementById('waBtn'), copyBtn=document.getElementById('copyBtn'),
-      editBtn=document.getElementById('editBtn'),
+      shareBtn=document.getElementById('shareBtn'), linkBtn=document.getElementById('linkBtn'),
+      copyBtn=document.getElementById('copyBtn'), editBtn=document.getElementById('editBtn'),
       tabCount=document.getElementById('tabCount'), tabForm=document.getElementById('tabForm'),
       tabDash=document.getElementById('tabDash'), panelForm=document.getElementById('panelForm'),
       panelDash=document.getElementById('panelDash'), tabsBox=document.getElementById('tabs'),
       lockBtn=document.getElementById('lockBtn'), lockForm=document.getElementById('lockForm'),
       adminKey=document.getElementById('adminKey'), lockMsg=document.getElementById('lockMsg');
 
-  var LS='jawatha-radio', records=[], isAdmin=false, dashDay=null;
+  var LS='jawatha-radio', records=[], isAdmin=false, dashDay=null, flushNote='';
   dayInput.value=todayKey();
 
   CRITERIA.forEach(function(label,i){
@@ -446,6 +448,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       topic:(p[4]||'').trim(),notes:(p[5]||'').trim()};
   }
 
+  var shareText='', shareLink='';
   function showResult(rec){
     var g=grade(rec.total);
     result.hidden=false;
@@ -453,22 +456,41 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     resPill.textContent=g.t; resPill.setAttribute('data-g',g.g);
     var code=encode(rec);
     codeTxt.textContent=code;
-    var msg='تقييم الإذاعة — '+rec.day+'\n'+rec.teacher+' — المجموع '+rec.total+' من 100 ('+g.t+')\n'+code;
-    waBtn.href='https://wa.me/?text='+encodeURIComponent(msg);
+    shareLink=location.origin+location.pathname+'#r='+encodeURIComponent(code);
+    shareText='تقييم الإذاعة — '+rec.day+'\n'+rec.teacher+' — المجموع '+rec.total+' من 100 ('+g.t+')\n'+shareLink;
     result.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
 
-  copyBtn.addEventListener('click',function(){
-    var txt=codeTxt.textContent;
-    function ok(){copyBtn.textContent='تم النسخ';setTimeout(function(){copyBtn.textContent='نسخ الرمز';},2000);}
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(ok,select);
-    }else select();
-    function select(){
-      var r=document.createRange();r.selectNodeContents(codeTxt);
-      var s=window.getSelection();s.removeAllRanges();s.addRange(r);
-      try{document.execCommand('copy');ok();}catch(e){copyBtn.textContent='حدِّد الرمز وانسخه';}
+  function flash(btn,msg,back){
+    var old=back||btn.textContent;
+    btn.textContent=msg;
+    setTimeout(function(){btn.textContent=old;},2200);
+  }
+  function putClipboard(txt,btn,done){
+    function fallback(){
+      var ta=document.createElement('textarea');
+      ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      var ok=false;try{ok=document.execCommand('copy');}catch(e){}
+      document.body.removeChild(ta);
+      flash(btn,ok?done:'انسخه يدويًا من الصندوق');
     }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){flash(btn,done);},fallback);
+    }else fallback();
+  }
+
+  shareBtn.addEventListener('click',function(){
+    if(navigator.share){
+      navigator.share({title:'تقييم الإذاعة المدرسية',text:shareText}).catch(function(){});
+    }else{
+      putClipboard(shareText,shareBtn,'تم النسخ — الصقه في أي تطبيق');
+    }
+  });
+  linkBtn.addEventListener('click',function(){putClipboard(shareLink,linkBtn,'تم نسخ الرابط');});
+
+  copyBtn.addEventListener('click',function(){
+    putClipboard(codeTxt.textContent,copyBtn,'تم نسخ الرمز');
   });
   editBtn.addEventListener('click',function(){
     result.hidden=true;toast.hidden=true;
@@ -556,7 +578,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     isAdmin=true;records=rowsRead();
     try{sessionStorage.setItem(LS+':admin','1');}catch(err){}
     lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
-    tabsBox.hidden=false;renderDash();show('dash');
+    tabsBox.hidden=false;flushPending();renderDash();show('dash');
   });
 
   /* ---------- لوحة النتائج ---------- */
@@ -586,7 +608,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       '<textarea id="pasteBox" style="min-height:92px" placeholder="JW1|2026-10-24|4535242314|اسم المعلم|عنوان الإذاعة|ملاحظة"></textarea></label>'+
       '<div class="actions" style="margin-top:10px"><button type="button" class="go" id="pasteGo">إضافة إلى النتائج</button>'+
       '<button type="button" class="ghost" id="clearAll">مسح كل السجل</button></div>'+
-      '<p class="hint" id="pasteMsg" style="margin-top:9px">يمكنك لصق كل الرسالة كما وصلتك، سيتم التقاط الرموز منها تلقائيًا.</p>'+
+      '<p class="hint" id="pasteMsg" style="margin-top:9px'+(flushNote?';color:var(--accent)':'')+'">'+
+      (flushNote||'يمكنك لصق كل الرسالة كما وصلتك، سيتم التقاط الرموز منها تلقائيًا.')+'</p>'+
       '</div></section>';
   }
   function bindPaste(){
@@ -731,12 +754,41 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     setTimeout(function(){URL.revokeObjectURL(url);},1500);
   }
 
+  /* ---------- استقبال نتيجة من رابط ---------- */
+  function pendRead(){try{var r=JSON.parse(localStorage.getItem(LS+':pending')||'[]');return Array.isArray(r)?r:[];}catch(e){return[];}}
+  function pendWrite(r){try{localStorage.setItem(LS+':pending',JSON.stringify(r));}catch(e){}}
+  function takeHash(){
+    var h=location.hash||'';
+    if(h.indexOf('#r=')!==0)return null;
+    var rec=null;
+    try{rec=decode(decodeURIComponent(h.slice(3)));}catch(e){rec=null;}
+    try{history.replaceState(null,'',location.pathname+location.search);}
+    catch(e){location.hash='';}
+    if(!rec)return null;
+    var p=pendRead();p.push(rec);pendWrite(p);
+    return rec;
+  }
+  function flushPending(){
+    var p=pendRead();
+    if(!p.length)return 0;
+    var res=addRows(p);
+    pendWrite([]);
+    flushNote='تمت إضافة '+ar(res.added)+' تقييم من الروابط التي فتحتها'+
+      (res.updated?' وتحديث '+ar(res.updated):'')+'.';
+    return p.length;
+  }
+
   /* ---------- البداية ---------- */
   refresh();
+  var incoming=takeHash();
   var wasAdmin='';
   try{wasAdmin=sessionStorage.getItem(LS+':admin')||'';}catch(e){}
   if(wasAdmin==='1'){
-    isAdmin=true;records=rowsRead();lockBtn.hidden=true;tabsBox.hidden=false;renderDash();
+    isAdmin=true;records=rowsRead();lockBtn.hidden=true;tabsBox.hidden=false;
+    flushPending();renderDash();
+    if(incoming)show('dash');
+  }else if(incoming){
+    say('وصلتك نتيجة تقييم من '+(incoming.teacher||'معلم')+' — ادخل كمشرف لإضافتها إلى المتوسط.',true);
   }
 })();
 </script>
