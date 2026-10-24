@@ -723,12 +723,12 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     }).join('');
 
     panelDash.innerHTML=
+      '<section class="card"><div class="card-h"><h2>متوسط تقييم الإذاعة</h2>'+
+        '<span class="note">'+(dashDay==='all'?'لكل الأيام المسجَّلة':'لهذا اليوم')+'</span></div>'+
+        '<div class="card-b">'+pick+tiles+'</div></section>'+
       '<section class="card"><div class="card-h"><h2>تقييمات المعلمين</h2>'+
         '<span class="note">اضغط على اسم المعلم لعرض درجاته في المعايير العشرة</span></div>'+
-        '<div class="card-b">'+pick+'<div class="tcards" style="margin-top:14px">'+cards+'</div></div></section>'+
-      '<section class="card"><div class="card-h"><h2>الخلاصة</h2>'+
-        '<span class="note">'+(dashDay==='all'?'لكل الأيام':'لهذا اليوم')+'</span></div>'+
-        '<div class="card-b">'+tiles+'</div></section>'+
+        '<div class="card-b"><div class="tcards">'+cards+'</div></div></section>'+
       '<section class="card"><div class="card-h"><h2>متوسط كل معيار</h2>'+
         '<span class="note">كل معيار من ١٠ درجات</span></div>'+
         '<div class="card-b"><div class="rows">'+bars+'</div></div></section>'+
