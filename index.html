@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: a green header band carrying the school mark, then two views —
-   the evaluation form for teachers, and a supervisor dashboard behind a passcode. */
+   the evaluation form for teachers, and a supervisor dashboard that totals pasted codes. */
 :root{
   --bg:#f5f8f6; --surface:#ffffff; --surface-2:#eef4f0;
   --fg:#17231d; --muted:#5d6f66; --line:#dbe6df;
@@ -54,8 +54,6 @@ img{max-width:100%}
 .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
   border-radius:999px;padding:4px 11px;font-size:.76rem;line-height:1.5}
-.dot{width:7px;height:7px;border-radius:50%;background:#8fe3b7;flex:none}
-.dot.local{background:#f0ce76}
 
 .tabs{display:flex;gap:5px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;
   width:fit-content;max-width:100%;margin-block:20px 18px}
@@ -117,9 +115,31 @@ button.go{font-family:var(--body);font-size:.9rem;font-weight:600;border-radius:
   padding:9px 18px;cursor:pointer;background:var(--accent);color:var(--on-accent);transition:filter .15s}
 button.go:hover:not(:disabled){filter:brightness(1.08)}
 button.go:disabled{opacity:.5;cursor:not-allowed}
-button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);border-radius:9px;
-  font-family:var(--body);font-weight:500;padding:7px 13px;font-size:.82rem;cursor:pointer}
-button.ghost:hover{border-color:var(--accent-light)}
+.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);border-radius:9px;
+  font-family:var(--body);font-weight:500;padding:8px 14px;font-size:.82rem;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.ghost:hover{border-color:var(--accent-light)}
+
+/* result + code hand-off */
+.result{margin-top:18px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:13px;overflow:hidden}
+.result .top{background:var(--accent-soft);padding:13px 15px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.result .sc{font-family:var(--display);font-size:2.1rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.result .of{font-size:.84rem;color:var(--muted)}
+.result .body{padding:14px 15px;display:flex;flex-direction:column;gap:11px}
+.result h3{font-size:.95rem}
+.codetxt{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;direction:ltr;text-align:left;
+  background:var(--surface-2);border:1px dashed var(--line);border-radius:9px;padding:10px 11px;
+  word-break:break-all;line-height:1.6;user-select:all}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.wa{background:#1f9d55;color:#fff;border-color:transparent;font-weight:600}
+.wa:hover{filter:brightness(1.07);border-color:transparent}
+.hint{font-size:.8rem;color:var(--muted);line-height:1.6}
+
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600;
+  background:var(--accent-soft);color:var(--accent)}
+.pill[data-g="g3"]{background:color-mix(in srgb,var(--g3) 16%,transparent);color:var(--g3)}
+.pill[data-g="g4"]{background:color-mix(in srgb,var(--g4) 16%,transparent);color:var(--g4)}
+.pill[data-g="g5"]{background:color-mix(in srgb,var(--g5) 16%,transparent);color:var(--g5)}
 
 .dash-top{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
 .dash-top label.f{flex:1 1 200px}
@@ -133,12 +153,7 @@ button.ghost:hover{border-color:var(--accent-light)}
 .tile.main dt{color:var(--on-accent);opacity:.85}
 .tile.main dd{font-size:2.5rem}
 .tile.main .of{font-size:.85rem;font-family:var(--body);font-weight:500;opacity:.85}
-.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600;
-  background:rgba(255,255,255,.18);color:var(--on-accent);margin-top:6px}
-.pill.std{background:var(--accent-soft);color:var(--accent)}
-.pill[data-g="g3"]{background:color-mix(in srgb,var(--g3) 16%,transparent);color:var(--g3)}
-.pill[data-g="g4"]{background:color-mix(in srgb,var(--g4) 16%,transparent);color:var(--g4)}
-.pill[data-g="g5"]{background:color-mix(in srgb,var(--g5) 16%,transparent);color:var(--g5)}
+.tile.main .pill{background:rgba(255,255,255,.18);color:var(--on-accent);margin-top:6px}
 
 .rows{display:flex;flex-direction:column;gap:9px}
 .row-c{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font-size:.82rem}
@@ -165,6 +180,8 @@ button.ghost:hover{border-color:var(--accent-light)}
 .tline .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tnote{background:var(--surface-2);border-radius:9px;padding:9px 11px;font-size:.82rem;line-height:1.55;margin-top:3px}
 .tnote b{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:2px}
+.del{background:transparent;border:0;color:var(--muted);font-size:.76rem;cursor:pointer;padding:2px 6px}
+.del:hover{color:var(--g5)}
 
 .tbl-wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:.84rem}
@@ -176,13 +193,8 @@ tr:last-child td{border-bottom:0}
 .empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:.86rem;line-height:1.7}
 .empty .ico{font-family:var(--display);font-size:1.8rem;color:var(--accent);opacity:.45;display:block;margin-bottom:4px}
 .toast{border-radius:10px;padding:10px 12px;font-size:.84rem;font-weight:500;margin-bottom:14px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--accent)}
 .toast.bad{background:color-mix(in srgb,var(--g5) 12%,transparent);border-color:color-mix(in srgb,var(--g5) 35%,transparent);color:var(--g5)}
-.toast .txt{flex:1;min-width:150px}
-.mine{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:13px 14px}
-.mine h3{font-size:.95rem;margin-bottom:6px}
-.mine .sc{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
 footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
 .lock{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:flex-end;max-width:340px;margin-inline:auto;text-align:right}
 .lock label.f{flex:1 1 170px}
@@ -241,8 +253,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     <h1>إذاعة تصنع الفرق وتترك الأثر</h1>
     <p class="lede">استبيان تقييم أفضل إذاعة مدرسية — عشرة معايير، كل معيار من ١٠ درجات، والمجموع من ١٠٠.</p>
     <div class="badges">
-      <span class="badge"><span class="dot" id="modeDot"></span><span id="modeTxt">سجل المدرسة</span></span>
       <span class="badge">مقياس التقييم: ٢ · ٤ · ٦ · ٨ · ١٠</span>
+      <span class="badge">يعمل بدون إنترنت بعد فتح الصفحة</span>
     </div>
   </div>
 </div>
@@ -272,9 +284,6 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
             <label class="f wide" for="topic">عنوان الإذاعة
               <input type="text" id="topic" name="topic" placeholder="مثال: إذاعة عن بر الوالدين — الصف السادس">
             </label>
-            <label class="f wide" for="school">المدرسة
-              <input type="text" id="school" name="school" value="مدارس جواثا الأهلية">
-            </label>
           </div>
 
           <p class="eyebrow" style="margin:20px 0 6px">معايير التقييم</p>
@@ -287,10 +296,26 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
           <div class="bar">
             <span class="tot"><b id="totalNum">٠</b><span>من ١٠٠</span></span>
             <span class="msg" id="formMsg">بقي ١٠ معايير لم تُقيَّم</span>
-            <button type="submit" class="go" id="submitBtn">إرسال التقييم</button>
+            <button type="submit" class="go" id="submitBtn">اعتماد التقييم</button>
           </div>
         </form>
-        <div class="mine" id="mine" hidden></div>
+
+        <div class="result" id="result" hidden>
+          <div class="top">
+            <span class="sc" id="resSc">٠</span><span class="of">من ١٠٠</span>
+            <span class="pill" id="resPill"></span>
+          </div>
+          <div class="body">
+            <h3>أرسل رمز تقييمك إلى مشرف الإذاعة</h3>
+            <p class="hint">المشرف يلزق الرموز في لوحة النتائج فيظهر المتوسط العام فورًا. الرمز يحمل درجاتك واسمك وملاحظتك.</p>
+            <div class="codetxt" id="codeTxt"></div>
+            <div class="actions">
+              <a class="ghost wa" id="waBtn" href="#" target="_blank" rel="noopener">إرسال على واتساب</a>
+              <button type="button" class="ghost" id="copyBtn">نسخ الرمز</button>
+              <button type="button" class="ghost" id="editBtn">تعديل تقييمي</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -304,7 +329,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       <label class="f" for="adminKey">رمز المشرف
         <input type="password" id="adminKey" autocomplete="current-password" placeholder="الرمز">
       </label>
-      <button type="submit" class="go" id="lockGo">دخول</button>
+      <button type="submit" class="go">دخول</button>
     </form>
     <span id="lockMsg" hidden></span>
   </footer>
@@ -312,10 +337,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
 
 <script>
 (function(){
-  /* ===== إعداد الربط بجوجل شيت =====
-     ضع هنا رابط تطبيق الويب الذي نسخته من Apps Script بعد النشر،
-     ويبدأ بـ https://script.google.com/macros/s/..../exec  */
-  var API='';
+  /* رمز دخول لوحة النتائج — غيّره وقت ما تحب */
+  var ADMIN_PASS='jawatha';
 
   var CRITERIA=[
     'الالتزام بالوقت والتنظيم',
@@ -350,26 +373,25 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       {weekday:'long',year:'numeric',month:'long',day:'numeric'});}
     catch(e){return ar(k);}
   }
+  function clean(s){return String(s||'').replace(/[|\r\n]+/g,' ').trim();}
 
   var form=document.getElementById('form'), critBox=document.getElementById('criteria'),
       totalNum=document.getElementById('totalNum'), formMsg=document.getElementById('formMsg'),
       submitBtn=document.getElementById('submitBtn'), dayInput=document.getElementById('day'),
-      teacher=document.getElementById('teacher'), school=document.getElementById('school'),
-      topic=document.getElementById('topic'), notes=document.getElementById('notes'),
-      toast=document.getElementById('toast'), mineBox=document.getElementById('mine'),
-      modeTxt=document.getElementById('modeTxt'), modeDot=document.getElementById('modeDot'),
+      teacher=document.getElementById('teacher'), topic=document.getElementById('topic'),
+      notes=document.getElementById('notes'), toast=document.getElementById('toast'),
+      result=document.getElementById('result'), resSc=document.getElementById('resSc'),
+      resPill=document.getElementById('resPill'), codeTxt=document.getElementById('codeTxt'),
+      waBtn=document.getElementById('waBtn'), copyBtn=document.getElementById('copyBtn'),
+      editBtn=document.getElementById('editBtn'),
       tabCount=document.getElementById('tabCount'), tabForm=document.getElementById('tabForm'),
       tabDash=document.getElementById('tabDash'), panelForm=document.getElementById('panelForm'),
       panelDash=document.getElementById('panelDash'), tabsBox=document.getElementById('tabs'),
       lockBtn=document.getElementById('lockBtn'), lockForm=document.getElementById('lockForm'),
-      adminKey=document.getElementById('adminKey'), lockGo=document.getElementById('lockGo'),
-      lockMsg=document.getElementById('lockMsg');
+      adminKey=document.getElementById('adminKey'), lockMsg=document.getElementById('lockMsg');
 
-  var LS='jawatha-radio', records=[], isAdmin=false, key='', dashDay=null;
+  var LS='jawatha-radio', records=[], isAdmin=false, dashDay=null;
   dayInput.value=todayKey();
-
-  if(API){modeDot.className='dot';modeTxt.textContent='التقييمات تُرسل إلى سجل المدرسة';}
-  else{modeDot.className='dot local';modeTxt.textContent='لم يُربَط السجل بعد — الحفظ على هذا الجهاز';}
 
   CRITERIA.forEach(function(label,i){
     var row=document.createElement('div'); row.className='crit';
@@ -401,70 +423,64 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     totalNum.textContent=ar(total);
     formMsg.className='msg';
     if(missing)formMsg.textContent='بقي '+ar(missing)+' من المعايير لم تُقيَّم';
-    else if(!teacher.value.trim())formMsg.textContent='اكتب اسمك لإتمام الإرسال';
-    else formMsg.textContent='التقييم جاهز للإرسال — المجموع '+ar(total)+' من ١٠٠';
+    else if(!teacher.value.trim())formMsg.textContent='اكتب اسمك لإتمام التقييم';
+    else formMsg.textContent='التقييم مكتمل — المجموع '+ar(total)+' من ١٠٠';
     return{a:a,total:total,missing:missing};
   }
   form.addEventListener('change',refresh);
   form.addEventListener('input',refresh);
 
-  /* ---------- هوية الجهاز والحفظ المحلي لتقييم المعلم نفسه ---------- */
-  function meSeed(){
-    var s='';
-    try{s=localStorage.getItem(LS+':me')||'';}catch(e){}
-    if(!s){s='m'+Math.random().toString(36).slice(2,12);try{localStorage.setItem(LS+':me',s);}catch(e){}}
-    return s;
+  /* ---------- رمز التقييم ---------- */
+  function encode(rec){
+    var digits=rec.scores.map(function(v){return String(v/2);}).join('');
+    return ['JW1',rec.day,digits,clean(rec.teacher),clean(rec.topic),clean(rec.notes)].join('|');
   }
-  function docId(){return 'ev-'+dayInput.value+'-'+meSeed();}
-  function mineRead(){try{var r=JSON.parse(localStorage.getItem(LS+':mine')||'[]');return Array.isArray(r)?r:[];}catch(e){return[];}}
-  function mineWrite(r){try{localStorage.setItem(LS+':mine',JSON.stringify(r));}catch(e){}}
-  function mineFor(day){
-    var all=mineRead();
-    for(var i=0;i<all.length;i++){if(all[i].day===day)return all[i];}
-    return null;
-  }
-  function mineSave(rec){
-    var all=mineRead().filter(function(r){return r.day!==rec.day;});
-    all.push(rec);mineWrite(all);
+  function decode(line){
+    var p=String(line||'').trim().split('|');
+    if(p.length<4||p[0].toUpperCase()!=='JW1')return null;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(p[1]))return null;
+    if(!/^[1-5]{10}$/.test(p[2]))return null;
+    var scores=p[2].split('').map(function(d){return (+d)*2;});
+    var total=scores.reduce(function(s,v){return s+v;},0);
+    return {day:p[1],scores:scores,total:total,teacher:(p[3]||'').trim(),
+      topic:(p[4]||'').trim(),notes:(p[5]||'').trim()};
   }
 
-  function showMine(){
-    var r=mineFor(dayInput.value);
-    if(!r){mineBox.hidden=true;return;}
-    var g=grade(r.total||0);
-    mineBox.hidden=false;
-    mineBox.innerHTML='<h3>نتيجتك في إذاعة '+prettyDay(r.day)+'</h3>'+
-      '<span class="sc">'+ar(r.total||0)+' <span style="font-size:.85rem;font-family:var(--body);color:var(--muted)">من ١٠٠</span></span> '+
-      '<span class="pill std" data-g="'+g.g+'">'+g.t+'</span>'+
-      (r.sent===false?'<p style="margin-top:8px;font-size:.8rem;color:var(--g5)">لم يصل إلى سجل المدرسة بعد — افتح الصفحة وأعد الإرسال.</p>':'');
+  function showResult(rec){
+    var g=grade(rec.total);
+    result.hidden=false;
+    resSc.textContent=ar(rec.total);
+    resPill.textContent=g.t; resPill.setAttribute('data-g',g.g);
+    var code=encode(rec);
+    codeTxt.textContent=code;
+    var msg='تقييم الإذاعة — '+rec.day+'\n'+rec.teacher+' — المجموع '+rec.total+' من 100 ('+g.t+')\n'+code;
+    waBtn.href='https://wa.me/?text='+encodeURIComponent(msg);
+    result.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
 
-  function prefillMine(){
-    var r=mineFor(dayInput.value);
-    if(!r){submitBtn.textContent='إرسال التقييم';showMine();return;}
-    teacher.value=r.teacher||'';
-    if(r.school)school.value=r.school;
-    if(r.topic)topic.value=r.topic;
-    notes.value=r.notes||'';
-    (r.scores||[]).forEach(function(v,i){
-      var el=document.getElementById('c'+i+'v'+v); if(el)el.checked=true;
-    });
-    submitBtn.textContent='تحديث تقييمي';
-    showMine();refresh();
-  }
+  copyBtn.addEventListener('click',function(){
+    var txt=codeTxt.textContent;
+    function ok(){copyBtn.textContent='تم النسخ';setTimeout(function(){copyBtn.textContent='نسخ الرمز';},2000);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok,select);
+    }else select();
+    function select(){
+      var r=document.createRange();r.selectNodeContents(codeTxt);
+      var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+      try{document.execCommand('copy');ok();}catch(e){copyBtn.textContent='حدِّد الرمز وانسخه';}
+    }
+  });
+  editBtn.addEventListener('click',function(){
+    result.hidden=true;toast.hidden=true;
+    submitBtn.textContent='اعتماد التقييم';
+    teacher.focus();
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
 
   function say(msg,ok){
     toast.hidden=false;
     toast.className=ok?'toast':'toast bad';
-    toast.innerHTML='<span class="txt">'+esc(msg)+'</span>';
-  }
-
-  /* ---------- الإرسال ---------- */
-  function send(rec){
-    if(!API)return Promise.reject(new Error('no-api'));
-    return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(rec)}).then(function(res){return res.json();})
-      .then(function(out){if(!out||!out.ok)throw new Error((out&&out.error)||'failed');return out;});
+    toast.textContent=msg;
   }
 
   form.addEventListener('submit',function(e){
@@ -475,69 +491,46 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     }
     if(st.missing){
       formMsg.className='msg err';
-      formMsg.textContent='بقي '+ar(st.missing)+' من المعايير — قيِّمها كلها قبل الإرسال';
+      formMsg.textContent='بقي '+ar(st.missing)+' من المعايير — قيِّمها كلها قبل الاعتماد';
       for(var i=0;i<CRITERIA.length;i++){
         if(!st.a[i]){var el=document.getElementById('v'+i);
           if(el)el.scrollIntoView({block:'center',behavior:'smooth'});break;}
       }
       return;
     }
-    var rec={id:docId(),teacher:teacher.value.trim(),school:school.value.trim(),
-      topic:topic.value.trim(),day:dayInput.value,scores:st.a,total:st.total,
-      notes:notes.value.trim(),at:new Date().toISOString()};
-    submitBtn.disabled=true;submitBtn.textContent='جارٍ الإرسال…';
-    function finish(sent){
-      rec.sent=sent;mineSave(rec);showMine();
-      submitBtn.disabled=false;submitBtn.textContent='تحديث تقييمي';
-      if(sent)say('تم تسجيل تقييمك — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
-      else say('تم حفظ تقييمك على هذا الجهاز فقط — تعذّر الوصول إلى سجل المدرسة. تأكد من الاتصال وأعد الإرسال.',false);
-    }
-    if(!API){finish(false);return;}
-    send(rec).then(function(){finish(true);}).catch(function(){finish(false);});
+    var rec={teacher:teacher.value.trim(),topic:topic.value.trim(),day:dayInput.value,
+      scores:st.a,total:st.total,notes:notes.value.trim()};
+    try{localStorage.setItem(LS+':draft',JSON.stringify(rec));}catch(err){}
+    say('تم اعتماد تقييمك — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
+    submitBtn.textContent='تحديث التقييم';
+    showResult(rec);
+    if(isAdmin){addRows([rec]);}
   });
 
   dayInput.addEventListener('change',function(){
     CRITERIA.forEach(function(_,i){
       var el=form.querySelector('input[name="c'+i+'"]:checked');if(el)el.checked=false;
     });
-    notes.value='';topic.value='';toast.hidden=true;
-    prefillMine();refresh();
+    notes.value='';topic.value='';toast.hidden=true;result.hidden=true;
+    submitBtn.textContent='اعتماد التقييم';refresh();
   });
 
-  /* ---------- دخول المشرف ---------- */
-  lockBtn.addEventListener('click',function(){
-    lockForm.hidden=!lockForm.hidden;
-    if(!lockForm.hidden)adminKey.focus();
-  });
-  lockForm.addEventListener('submit',function(e){
-    e.preventDefault();
-    var k=adminKey.value.trim();
-    if(!k)return;
-    if(!API){note('لم يُربَط السجل بجوجل شيت بعد.',false);return;}
-    lockGo.disabled=true;lockGo.textContent='جارٍ التحقق…';
-    fetch(API+'?key='+encodeURIComponent(k))
-      .then(function(r){return r.json();})
-      .then(function(out){
-        lockGo.disabled=false;lockGo.textContent='دخول';
-        if(!out||!out.ok){note('الرمز غير صحيح.',false);return;}
-        key=k;isAdmin=true;records=out.rows||[];
-        try{sessionStorage.setItem(LS+':key',k);}catch(e){}
-        lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
-        tabsBox.hidden=false;renderDash();show('dash');
-      })
-      .catch(function(){
-        lockGo.disabled=false;lockGo.textContent='دخول';
-        note('تعذّر الاتصال بالسجل.',false);
-      });
-  });
-  function note(msg,ok){
-    lockMsg.hidden=false;lockMsg.textContent=msg;
-    lockMsg.style.color=ok?'var(--accent)':'var(--g5)';
-  }
-  function reload(){
-    if(!isAdmin||!API)return Promise.resolve();
-    return fetch(API+'?key='+encodeURIComponent(key)).then(function(r){return r.json();})
-      .then(function(out){if(out&&out.ok){records=out.rows||[];renderDash();}});
+  /* ---------- سجل المشرف ---------- */
+  function rowsRead(){try{var r=JSON.parse(localStorage.getItem(LS+':rows')||'[]');return Array.isArray(r)?r:[];}catch(e){return[];}}
+  function rowsWrite(r){try{localStorage.setItem(LS+':rows',JSON.stringify(r));}catch(e){}}
+  function keyOf(r){return r.day+'::'+(r.teacher||'').replace(/\s+/g,' ').trim();}
+  function addRows(list){
+    var map={};
+    records.forEach(function(r){map[keyOf(r)]=r;});
+    var added=0,updated=0;
+    list.forEach(function(r){
+      var k=keyOf(r);
+      if(map[k])updated++;else added++;
+      map[k]=r;
+    });
+    records=Object.keys(map).map(function(k){return map[k];});
+    rowsWrite(records);renderDash();
+    return{added:added,updated:updated};
   }
 
   /* ---------- التبويبات ---------- */
@@ -551,6 +544,21 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   tabForm.addEventListener('click',function(){show('form');});
   tabDash.addEventListener('click',function(){show('dash');});
 
+  lockBtn.addEventListener('click',function(){
+    lockForm.hidden=!lockForm.hidden;
+    if(!lockForm.hidden)adminKey.focus();
+  });
+  lockForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(adminKey.value.trim()!==ADMIN_PASS){
+      lockMsg.hidden=false;lockMsg.textContent='الرمز غير صحيح.';lockMsg.style.color='var(--g5)';return;
+    }
+    isAdmin=true;records=rowsRead();
+    try{sessionStorage.setItem(LS+':admin','1');}catch(err){}
+    lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
+    tabsBox.hidden=false;renderDash();show('dash');
+  });
+
   /* ---------- لوحة النتائج ---------- */
   function days(){
     var seen={},out=[];
@@ -562,12 +570,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       .slice().sort(function(x,y){return (y.total||0)-(x.total||0);});
   }
   function topicOf(d){
-    var best='',t=0;
-    records.forEach(function(r){
-      if(r.day!==d||!r.topic)return;
-      var when=Date.parse(r.at||'')||0;
-      if(when>=t){t=when;best=r.topic;}
-    });
+    var best='';
+    records.forEach(function(r){if(r.day===d&&r.topic)best=r.topic;});
     return best;
   }
   function avgOf(rows){
@@ -575,16 +579,54 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     return rows.reduce(function(s,r){return s+(r.total||0);},0)/rows.length;
   }
 
+  function pasteCard(){
+    return '<section class="card"><div class="card-h"><h2>إضافة رموز المعلمين</h2>'+
+      '<span class="note">كل رمز في سطر</span></div><div class="card-b">'+
+      '<label class="f" for="pasteBox">الصق الرموز التي وصلتك على واتساب'+
+      '<textarea id="pasteBox" style="min-height:92px" placeholder="JW1|2026-10-24|4535242314|اسم المعلم|عنوان الإذاعة|ملاحظة"></textarea></label>'+
+      '<div class="actions" style="margin-top:10px"><button type="button" class="go" id="pasteGo">إضافة إلى النتائج</button>'+
+      '<button type="button" class="ghost" id="clearAll">مسح كل السجل</button></div>'+
+      '<p class="hint" id="pasteMsg" style="margin-top:9px">يمكنك لصق كل الرسالة كما وصلتك، سيتم التقاط الرموز منها تلقائيًا.</p>'+
+      '</div></section>';
+  }
+  function bindPaste(){
+    var go=document.getElementById('pasteGo'), box=document.getElementById('pasteBox'),
+        msg=document.getElementById('pasteMsg'), clr=document.getElementById('clearAll');
+    if(go)go.addEventListener('click',function(){
+      var lines=String(box.value||'').split(/\r?\n/), good=[], bad=0;
+      lines.forEach(function(l){
+        if(!l.trim())return;
+        var r=decode(l);
+        if(r)good.push(r);else if(l.indexOf('|')>-1||/JW1/i.test(l))bad++;
+      });
+      if(!good.length){
+        msg.textContent=bad?'لم أتعرف على أي رمز صحيح — تأكد أنك نسخت السطر الذي يبدأ بـ JW1 كاملًا.':'لم تُلصق أي رموز.';
+        msg.style.color='var(--g5)';return;
+      }
+      var res=addRows(good);
+      box.value='';
+      var m=document.getElementById('pasteMsg');
+      if(m){m.style.color='var(--accent)';
+        m.textContent='تمت إضافة '+ar(res.added)+' تقييم'+(res.updated?' وتحديث '+ar(res.updated):'')+
+          (bad?' — وتعذّر قراءة '+ar(bad)+' سطر.':'');}
+    });
+    if(clr)clr.addEventListener('click',function(){
+      if(!records.length)return;
+      clr.textContent='اضغط مرة أخرى للتأكيد';
+      clr.onclick=function(){records=[];rowsWrite(records);renderDash();};
+    });
+  }
+
   function renderDash(){
     if(!isAdmin){panelDash.innerHTML='';tabCount.textContent='';return;}
     var all=days();
     tabCount.textContent=records.length?'('+ar(records.length)+')':'';
     if(!records.length){
-      panelDash.innerHTML='<section class="card"><div class="card-h"><h2>لوحة النتائج</h2>'+
-        '<button type="button" class="ghost" id="reloadBtn">تحديث</button></div>'+
+      panelDash.innerHTML=pasteCard()+
+        '<section class="card"><div class="card-h"><h2>المتوسط العام</h2></div>'+
         '<div class="card-b"><div class="empty"><span class="ico">◠</span>لا توجد تقييمات بعد.<br>'+
-        'بعد أن يرسل أول معلم تقييمه يظهر هنا المتوسط العام وتفاصيل كل معلم.</div></div></section>';
-      bindReload();return;
+        'الصق أول رمز وصلك من معلم، فيظهر المتوسط وتفاصيل كل معيار.</div></div></section>';
+      bindPaste();return;
     }
     if(!dashDay||(dashDay!=='all'&&all.indexOf(dashDay)<0))dashDay=all[0];
     var rows=forDay(dashDay), n=rows.length, avg=avgOf(rows), g=grade(avg);
@@ -595,8 +637,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var tl=dashDay==='all'?'':topicOf(dashDay);
     var head='<div class="dash-top">'+
       '<label class="f" for="dashDay">اليوم المعروض<select id="dashDay">'+opts+'</select></label>'+
-      '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button>'+
-      '<button type="button" class="ghost" id="reloadBtn">تحديث</button></div>'+
+      '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button></div>'+
       '<p class="ttl">'+(dashDay==='all'?'<span class="ph">متوسط جميع الأيام المسجَّلة</span>':
         (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>'))+'</p>'+
       '<dl class="tiles">'+
@@ -625,7 +666,10 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         '<span class="sc" style="color:var(--'+rg.g+')">'+ar(r.total||0)+' <span>من ١٠٠</span></span>'+
         '<span class="caret">▼</span></summary><div class="tdetail">'+lines+
         (r.notes?'<div class="tnote"><b>ملاحظات المعلم</b>'+esc(r.notes)+'</div>':'')+
-        '<div><span class="pill std" data-g="'+rg.g+'">التقدير: '+rg.t+'</span></div></div></details>';
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<span class="pill" data-g="'+rg.g+'">التقدير: '+rg.t+'</span>'+
+        '<button type="button" class="del" data-k="'+esc(keyOf(r))+'">حذف هذا التقييم</button></div>'+
+        '</div></details>';
     }).join('');
 
     var daysTbl=all.map(function(d){
@@ -635,9 +679,9 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         '<td class="sc" style="color:var(--'+dg.g+')">'+dg.t+'</td></tr>';
     }).join('');
 
-    panelDash.innerHTML=
+    panelDash.innerHTML=pasteCard()+
       '<section class="card"><div class="card-h"><h2>المتوسط العام</h2>'+
-        '<span class="note">من سجل المدرسة في جوجل شيت</span></div>'+
+        '<span class="note">يُحسب من كل الرموز المضافة</span></div>'+
         '<div class="card-b">'+head+'</div></section>'+
       '<section class="card"><div class="card-h"><h2>متوسط كل معيار</h2>'+
         '<span class="note">كل معيار من ١٠ درجات</span></div>'+
@@ -651,30 +695,26 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         '<th>المقيّمون</th><th>المتوسط</th><th>التقدير</th></tr></thead><tbody>'+daysTbl+
         '</tbody></table></div></div></section>';
 
+    bindPaste();
     var sel=document.getElementById('dashDay');
     if(sel)sel.addEventListener('change',function(){dashDay=sel.value;renderDash();});
     var csv=document.getElementById('csvBtn');
     if(csv)csv.addEventListener('click',function(){exportCsv(rows,dashDay);});
-    bindReload();
-  }
-  function bindReload(){
-    var b=document.getElementById('reloadBtn');
-    if(!b)return;
-    b.addEventListener('click',function(){
-      b.disabled=true;b.textContent='جارٍ التحديث…';
-      reload().then(function(){}).catch(function(){}).then(function(){
-        var nb=document.getElementById('reloadBtn');
-        if(nb){nb.disabled=false;nb.textContent='تحديث';}
+    Array.prototype.forEach.call(panelDash.querySelectorAll('.del'),function(b){
+      b.addEventListener('click',function(){
+        var k=b.getAttribute('data-k');
+        records=records.filter(function(r){return keyOf(r)!==k;});
+        rowsWrite(records);renderDash();
       });
     });
   }
 
   function exportCsv(rows,day){
-    var head=['المعلم','المدرسة','التاريخ','عنوان الإذاعة']
+    var head=['المعلم','التاريخ','عنوان الإذاعة']
       .concat(CRITERIA.map(function(l,i){return (i+1)+'. '+l;}))
       .concat(['المجموع من 100','التقدير','الملاحظات']);
     var lines=[head].concat(rows.map(function(r){
-      return [r.teacher||'',r.school||'',r.day||'',r.topic||'']
+      return [r.teacher||'',r.day||'',r.topic||'']
         .concat(CRITERIA.map(function(_,i){return (r.scores&&r.scores[i])||0;}))
         .concat([r.total||0,grade(r.total||0).t,String(r.notes||'').replace(/\r?\n/g,' ')]);
     }));
@@ -693,16 +733,10 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
 
   /* ---------- البداية ---------- */
   refresh();
-  prefillMine();
-  var saved='';
-  try{saved=sessionStorage.getItem(LS+':key')||'';}catch(e){}
-  if(saved&&API){
-    fetch(API+'?key='+encodeURIComponent(saved)).then(function(r){return r.json();}).then(function(out){
-      if(out&&out.ok){
-        key=saved;isAdmin=true;records=out.rows||[];
-        lockBtn.hidden=true;tabsBox.hidden=false;renderDash();
-      }
-    }).catch(function(){});
+  var wasAdmin='';
+  try{wasAdmin=sessionStorage.getItem(LS+':admin')||'';}catch(e){}
+  if(wasAdmin==='1'){
+    isAdmin=true;records=rowsRead();lockBtn.hidden=true;tabsBox.hidden=false;renderDash();
   }
 })();
 </script>
