@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>إذاعة تصنع الفرق وتترك الأثر — مدارس جواثا الأهلية</title>
+<meta name="description" content="استبيان تقييم الإذاعة المدرسية الصباحية في مدارس جواثا الأهلية على عشرة معايير، مع لوحة نتائج للمشرف تحسب المتوسط العام.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a green header band carrying the school mark, then two views —
+   the evaluation form for teachers, and a supervisor dashboard behind a passcode. */
+:root{
+  --bg:#f5f8f6; --surface:#ffffff; --surface-2:#eef4f0;
+  --fg:#17231d; --muted:#5d6f66; --line:#dbe6df;
+  --accent:#12724a; --accent-deep:#0a4e32; --accent-light:#2e9d6b; --accent-soft:#e4f1ea;
+  --on-accent:#f2fbf6;
+  --g1:#12724a; --g2:#2e9d6b; --g3:#9a7b12; --g4:#b06a24; --g5:#ab4230;
+  --shadow:0 1px 2px rgba(10,78,50,.06), 0 8px 24px -12px rgba(10,78,50,.18);
+  --display:"Reem Kufi","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans Arabic","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1512; --surface:#152019; --surface-2:#1b2821; --fg:#e8f1eb; --muted:#9bb1a5; --line:#28372f;
+  --accent:#3fb07a; --accent-deep:#0a3c28; --accent-light:#5fc994; --accent-soft:#16342a; --on-accent:#f2fbf6;
+  --g1:#5fc994; --g2:#3fb07a; --g3:#d4b23f; --g4:#dd9349; --g5:#e2705c;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1512; --surface:#152019; --surface-2:#1b2821; --fg:#e8f1eb; --muted:#9bb1a5; --line:#28372f;
+  --accent:#3fb07a; --accent-deep:#0a3c28; --accent-light:#5fc994; --accent-soft:#16342a; --on-accent:#f2fbf6;
+  --g1:#5fc994; --g2:#3fb07a; --g3:#d4b23f; --g4:#dd9349; --g5:#e2705c;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.6);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;margin:0}
+p{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+.inner{max-width:1120px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.band{background:linear-gradient(170deg,var(--accent) 0%,var(--accent-deep) 100%);color:var(--on-accent)}
+.band .inner{padding-block:22px 26px}
+.brand{display:flex;align-items:center;gap:14px}
+.mark{width:58px;height:58px;flex:none;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.brand-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.brand-name{font-family:var(--display);font-size:1.22rem;font-weight:700;line-height:1.25}
+.brand-sub{font-size:.76rem;opacity:.82;letter-spacing:.04em}
+.band h1{font-size:clamp(1.3rem,4.4vw,1.85rem);margin-top:20px;color:#fff}
+.band .lede{font-size:.9rem;opacity:.86;margin-top:6px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;padding:4px 11px;font-size:.76rem;line-height:1.5}
+.dot{width:7px;height:7px;border-radius:50%;background:#8fe3b7;flex:none}
+.dot.local{background:#f0ce76}
+
+.tabs{display:flex;gap:5px;background:var(--surface-2);border:1px solid var(--line);padding:4px;border-radius:12px;
+  width:fit-content;max-width:100%;margin-block:20px 18px}
+.tab{background:transparent;border:0;color:var(--muted);font-family:var(--body);font-size:.88rem;font-weight:600;
+  padding:8px 15px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+.tab .n{font-variant-numeric:tabular-nums;opacity:.75;font-weight:500}
+
+main.inner{padding-block:0 40px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);min-width:0}
+.card+.card{margin-top:18px}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:14px 16px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:1.02rem}
+.card-h .note{font-size:.76rem;color:var(--muted)}
+.card-b{padding:16px}
+#panelForm{max-width:720px;margin-top:20px}
+
+.eyebrow{font-size:.7rem;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px}
+.fields .wide{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:.82rem;color:var(--muted);font-weight:500;min-width:0}
+input[type=text],input[type=date],input[type=password],textarea,select{font-family:inherit;font-size:.95rem;color:var(--fg);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%;transition:border-color .15s}
+select{cursor:pointer}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent-light);outline-offset:2px}
+.chip:focus-within{outline:2px solid var(--accent-light);outline-offset:2px}
+textarea{resize:vertical;min-height:70px}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.75}
+
+.crit{border-top:1px solid var(--line);padding:13px 0}
+.crit:first-child{border-top:0;padding-top:2px}
+.crit-h{display:flex;align-items:baseline;gap:9px;margin-bottom:9px}
+.num{font-family:var(--display);font-size:.78rem;font-weight:700;color:var(--accent);background:var(--accent-soft);
+  border-radius:7px;min-width:24px;height:24px;display:grid;place-items:center;flex:none;font-variant-numeric:tabular-nums}
+.crit-t{font-weight:600;font-size:.94rem;line-height:1.45;flex:1;min-width:0}
+.crit-v{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.crit-v b{color:var(--accent);font-size:.95rem}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.chip{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px 6px;
+  background:var(--surface-2);border:1.5px solid var(--line);border-radius:10px;cursor:pointer;
+  transition:background .15s,border-color .15s}
+.chip input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.chip s{font-family:var(--display);font-size:1.02rem;font-weight:700;text-decoration:none;font-variant-numeric:tabular-nums}
+.chip em{font-style:normal;font-size:.63rem;color:var(--muted);line-height:1.25;text-align:center}
+.chip:hover{border-color:var(--accent-light)}
+.chip:has(input:checked){background:var(--accent);border-color:var(--accent-deep);color:var(--on-accent)}
+.chip:has(input:checked) em{color:var(--on-accent);opacity:.86}
+
+.bar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin-top:16px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--surface);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:11px 14px}
+.bar .tot{display:flex;align-items:baseline;gap:7px;font-family:var(--display)}
+.bar .tot b{font-size:1.65rem;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
+.bar .tot span{font-size:.82rem;color:var(--muted);font-family:var(--body)}
+.bar .msg{font-size:.78rem;color:var(--muted);flex:1;min-width:110px}
+.bar .msg.err{color:var(--g5)}
+button.go{font-family:var(--body);font-size:.9rem;font-weight:600;border-radius:9px;border:1px solid transparent;
+  padding:9px 18px;cursor:pointer;background:var(--accent);color:var(--on-accent);transition:filter .15s}
+button.go:hover:not(:disabled){filter:brightness(1.08)}
+button.go:disabled{opacity:.5;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);border-radius:9px;
+  font-family:var(--body);font-weight:500;padding:7px 13px;font-size:.82rem;cursor:pointer}
+button.ghost:hover{border-color:var(--accent-light)}
+
+.dash-top{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.dash-top label.f{flex:1 1 200px}
+.ttl{font-family:var(--display);font-size:1.12rem;font-weight:600;margin-top:14px;line-height:1.4}
+.ttl .ph{color:var(--muted);font-weight:400;font-size:.92rem;font-family:var(--body)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-top:14px}
+.tile{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 13px;min-width:0}
+.tile dt{font-size:.74rem;color:var(--muted);margin-bottom:3px}
+.tile dd{margin:0;font-family:var(--display);font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile.main{background:var(--accent);border-color:var(--accent-deep);color:var(--on-accent)}
+.tile.main dt{color:var(--on-accent);opacity:.85}
+.tile.main dd{font-size:2.5rem}
+.tile.main .of{font-size:.85rem;font-family:var(--body);font-weight:500;opacity:.85}
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:.8rem;font-weight:600;
+  background:rgba(255,255,255,.18);color:var(--on-accent);margin-top:6px}
+.pill.std{background:var(--accent-soft);color:var(--accent)}
+.pill[data-g="g3"]{background:color-mix(in srgb,var(--g3) 16%,transparent);color:var(--g3)}
+.pill[data-g="g4"]{background:color-mix(in srgb,var(--g4) 16%,transparent);color:var(--g4)}
+.pill[data-g="g5"]{background:color-mix(in srgb,var(--g5) 16%,transparent);color:var(--g5)}
+
+.rows{display:flex;flex-direction:column;gap:9px}
+.row-c{display:grid;grid-template-columns:1fr auto;gap:3px 8px;font-size:.82rem}
+.row-c .t{min-width:0;line-height:1.4}
+.row-c .v{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.track{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--accent-light),var(--accent));border-radius:99px}
+
+.tcards{display:flex;flex-direction:column;gap:9px}
+.tcard{border:1px solid var(--line);border-radius:11px;background:var(--surface);overflow:hidden}
+.tcard summary{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;list-style:none}
+.tcard summary::-webkit-details-marker{display:none}
+.tcard .nm{font-weight:600;flex:1;min-width:0;line-height:1.35}
+.tcard .nm small{display:block;font-weight:400;font-size:.73rem;color:var(--muted)}
+.tcard .sc{font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tcard .sc span{font-family:var(--body);font-weight:400;font-size:.76rem;color:var(--muted)}
+.caret{color:var(--muted);font-size:.7rem;transition:transform .15s;flex:none}
+.tcard[open] .caret{transform:rotate(180deg)}
+.tcard[open] summary{background:var(--surface-2);border-bottom:1px solid var(--line)}
+.tdetail{padding:11px 12px;display:flex;flex-direction:column;gap:7px}
+.tline{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;font-size:.82rem}
+.tline .i{color:var(--muted);font-variant-numeric:tabular-nums;font-size:.76rem}
+.tline .t{min-width:0;line-height:1.4}
+.tline .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tnote{background:var(--surface-2);border-radius:9px;padding:9px 11px;font-size:.82rem;line-height:1.55;margin-top:3px}
+.tnote b{display:block;font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:2px}
+
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;color:var(--muted);font-weight:600}
+td.sc{font-variant-numeric:tabular-nums;font-weight:600}
+td.wrap{white-space:normal;min-width:160px}
+tr:last-child td{border-bottom:0}
+.empty{text-align:center;padding:26px 12px;color:var(--muted);font-size:.86rem;line-height:1.7}
+.empty .ico{font-family:var(--display);font-size:1.8rem;color:var(--accent);opacity:.45;display:block;margin-bottom:4px}
+.toast{border-radius:10px;padding:10px 12px;font-size:.84rem;font-weight:500;margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);color:var(--accent)}
+.toast.bad{background:color-mix(in srgb,var(--g5) 12%,transparent);border-color:color-mix(in srgb,var(--g5) 35%,transparent);color:var(--g5)}
+.toast .txt{flex:1;min-width:150px}
+.mine{margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:13px 14px}
+.mine h3{font-size:.95rem;margin-bottom:6px}
+.mine .sc{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.lock{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:flex-end;max-width:340px;margin-inline:auto;text-align:right}
+.lock label.f{flex:1 1 170px}
+</style>
+</head>
+<body>
+
+<div class="band">
+  <div class="inner">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 100 100" role="img" aria-label="شعار مدارس جواثا الأهلية">
+        <defs>
+          <path id="petal" d="M0 0 Q14 -22 20 -40 Q0 -46.5 -20 -40 Q-14 -22 0 0 Z"></path>
+          <pattern id="jdots" width="4.6" height="4.6" patternUnits="userSpaceOnUse">
+            <circle cx="2.3" cy="2.3" r="1.1" fill="#d08f05"></circle>
+          </pattern>
+          <clipPath id="clipBlue"><use href="#petal" transform="translate(50,50) rotate(45)"></use></clipPath>
+          <clipPath id="clipGreen"><use href="#petal" transform="translate(50,50) rotate(-135)"></use></clipPath>
+          <clipPath id="clipRed"><use href="#petal" transform="translate(50,50) rotate(135)"></use></clipPath>
+        </defs>
+        <circle cx="50" cy="50" r="50" fill="#ffffff"></circle>
+        <g transform="translate(50,50) rotate(-45)">
+          <use href="#petal" fill="#f4c01c"></use>
+          <use href="#petal" fill="url(#jdots)"></use>
+        </g>
+        <g transform="translate(50,50) rotate(45)"><use href="#petal" fill="#17509b"></use></g>
+        <g clip-path="url(#clipBlue)">
+          <g fill="none" stroke="#57c08c" stroke-width="1.5">
+            <circle cx="68" cy="32" r="13.5"></circle>
+            <circle cx="68" cy="32" r="9"></circle>
+          </g>
+          <path d="M68 25.5l1.9 4.1 4.5.5-3.3 3.1.9 4.4-4-2.3-4 2.3.9-4.4-3.3-3.1 4.5-.5z" fill="#57c08c"></path>
+        </g>
+        <g transform="translate(50,50) rotate(-135)"><use href="#petal" fill="#2b9b4f"></use></g>
+        <g clip-path="url(#clipGreen)" fill="none" stroke="#abdc6e" stroke-width="2.2">
+          <circle cx="50" cy="50" r="15"></circle>
+          <circle cx="50" cy="50" r="22"></circle>
+          <circle cx="50" cy="50" r="29"></circle>
+          <circle cx="50" cy="50" r="36"></circle>
+        </g>
+        <g transform="translate(50,50) rotate(135)"><use href="#petal" fill="#e3291f"></use></g>
+        <g clip-path="url(#clipRed)">
+          <g stroke="#f7b500" stroke-width="1.5" fill="none">
+            <path d="M50 50L92 50"></path><path d="M50 50L86 64"></path><path d="M50 50L78 78"></path>
+            <path d="M50 50L64 86"></path><path d="M50 50L50 92"></path>
+            <path d="M58 58L84 46"></path><path d="M58 58L46 84"></path>
+          </g>
+          <path d="M68 60l2.2 5.8 5.8 2.2-5.8 2.2-2.2 5.8-2.2-5.8-5.8-2.2 5.8-2.2z" fill="#f7b500"></path>
+        </g>
+      </svg>
+      <div class="brand-txt">
+        <span class="brand-name">مدارس جواثا الأهلية</span>
+        <span class="brand-sub">الإذاعة المدرسية الصباحية</span>
+      </div>
+    </div>
+    <h1>إذاعة تصنع الفرق وتترك الأثر</h1>
+    <p class="lede">استبيان تقييم أفضل إذاعة مدرسية — عشرة معايير، كل معيار من ١٠ درجات، والمجموع من ١٠٠.</p>
+    <div class="badges">
+      <span class="badge"><span class="dot" id="modeDot"></span><span id="modeTxt">سجل المدرسة</span></span>
+      <span class="badge">مقياس التقييم: ٢ · ٤ · ٦ · ٨ · ١٠</span>
+    </div>
+  </div>
+</div>
+
+<main class="inner">
+  <div class="tabs" id="tabs" role="tablist" aria-label="أقسام الموقع" hidden>
+    <button class="tab" id="tabForm" role="tab" aria-selected="true" aria-controls="panelForm" type="button">استبيان التقييم</button>
+    <button class="tab" id="tabDash" role="tab" aria-selected="false" aria-controls="panelDash" type="button">لوحة النتائج <span class="n" id="tabCount"></span></button>
+  </div>
+
+  <div id="panelForm" role="tabpanel" aria-labelledby="tabForm">
+    <section class="card" aria-labelledby="formH">
+      <div class="card-h">
+        <h2 id="formH">تقييم المعلم</h2>
+        <span class="note">كل معيار مطلوب — اختر تقديرًا واحدًا</span>
+      </div>
+      <div class="card-b">
+        <div id="toast" hidden></div>
+        <form id="form" novalidate>
+          <div class="fields">
+            <label class="f" for="teacher">اسم المعلم المقيِّم
+              <input type="text" id="teacher" name="teacher" placeholder="الاسم الكامل" autocomplete="name">
+            </label>
+            <label class="f" for="day">تاريخ الإذاعة
+              <input type="date" id="day" name="day">
+            </label>
+            <label class="f wide" for="topic">عنوان الإذاعة
+              <input type="text" id="topic" name="topic" placeholder="مثال: إذاعة عن بر الوالدين — الصف السادس">
+            </label>
+            <label class="f wide" for="school">المدرسة
+              <input type="text" id="school" name="school" value="مدارس جواثا الأهلية">
+            </label>
+          </div>
+
+          <p class="eyebrow" style="margin:20px 0 6px">معايير التقييم</p>
+          <div id="criteria"></div>
+
+          <label class="f" for="notes" style="margin-top:16px">الملاحظات <span style="font-weight:400">(اختياري)</span>
+            <textarea id="notes" name="notes" placeholder="ما الذي تميّزت فيه الإذاعة؟ وما يمكن تطويره؟"></textarea>
+          </label>
+
+          <div class="bar">
+            <span class="tot"><b id="totalNum">٠</b><span>من ١٠٠</span></span>
+            <span class="msg" id="formMsg">بقي ١٠ معايير لم تُقيَّم</span>
+            <button type="submit" class="go" id="submitBtn">إرسال التقييم</button>
+          </div>
+        </form>
+        <div class="mine" id="mine" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="panelDash" role="tabpanel" aria-labelledby="tabDash" hidden></div>
+
+  <footer>
+    <span>مدارس جواثا الأهلية · إذاعة تصنع الفرق وتترك الأثر</span>
+    <button type="button" class="ghost" id="lockBtn">دخول المشرف</button>
+    <form class="lock" id="lockForm" hidden>
+      <label class="f" for="adminKey">رمز المشرف
+        <input type="password" id="adminKey" autocomplete="current-password" placeholder="الرمز">
+      </label>
+      <button type="submit" class="go" id="lockGo">دخول</button>
+    </form>
+    <span id="lockMsg" hidden></span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  /* ===== إعداد الربط بجوجل شيت =====
+     ضع هنا رابط تطبيق الويب الذي نسخته من Apps Script بعد النشر،
+     ويبدأ بـ https://script.google.com/macros/s/..../exec  */
+  var API='';
+
+  var CRITERIA=[
+    'الالتزام بالوقت والتنظيم',
+    'جودة المقدمة وجذب الانتباه',
+    'تنوع الفقرات وتكاملها',
+    'سلامة اللغة العربية والإلقاء',
+    'جودة الصوت ووضوحه',
+    'الإبداع والابتكار في التقديم',
+    'القيمة التربوية والثقافية للمحتوى',
+    'مشاركة الطلاب وتوزيع الأدوار',
+    'استخدام الوسائل والتقنيات المناسبة',
+    'التأثير في الجمهور وترك أثر إيجابي'
+  ];
+  var SCALE=[{v:2,l:'ضعيف جدًا'},{v:4,l:'ضعيف'},{v:6,l:'متوسط'},{v:8,l:'جيد'},{v:10,l:'ممتاز'}];
+  var AR='٠١٢٣٤٥٦٧٨٩';
+  function ar(n){return String(n).replace(/[0-9]/g,function(d){return AR.charAt(+d)});}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+    return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':'&quot;';});}
+  function grade(p){
+    if(p>=90)return{t:'ممتاز',g:'g1'};
+    if(p>=80)return{t:'جيد جدًا',g:'g2'};
+    if(p>=70)return{t:'جيد',g:'g3'};
+    if(p>=60)return{t:'مقبول',g:'g4'};
+    return{t:'يحتاج إلى تطوير',g:'g5'};
+  }
+  function markColor(v){return v>=10?'g1':v>=8?'g2':v>=6?'g3':v>=4?'g4':'g5';}
+  function todayKey(){var d=new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function prettyDay(k){
+    var p=String(k||'').split('-'); if(p.length!==3)return ar(k||'');
+    try{return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('ar-u-ca-gregory',
+      {weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+    catch(e){return ar(k);}
+  }
+
+  var form=document.getElementById('form'), critBox=document.getElementById('criteria'),
+      totalNum=document.getElementById('totalNum'), formMsg=document.getElementById('formMsg'),
+      submitBtn=document.getElementById('submitBtn'), dayInput=document.getElementById('day'),
+      teacher=document.getElementById('teacher'), school=document.getElementById('school'),
+      topic=document.getElementById('topic'), notes=document.getElementById('notes'),
+      toast=document.getElementById('toast'), mineBox=document.getElementById('mine'),
+      modeTxt=document.getElementById('modeTxt'), modeDot=document.getElementById('modeDot'),
+      tabCount=document.getElementById('tabCount'), tabForm=document.getElementById('tabForm'),
+      tabDash=document.getElementById('tabDash'), panelForm=document.getElementById('panelForm'),
+      panelDash=document.getElementById('panelDash'), tabsBox=document.getElementById('tabs'),
+      lockBtn=document.getElementById('lockBtn'), lockForm=document.getElementById('lockForm'),
+      adminKey=document.getElementById('adminKey'), lockGo=document.getElementById('lockGo'),
+      lockMsg=document.getElementById('lockMsg');
+
+  var LS='jawatha-radio', records=[], isAdmin=false, key='', dashDay=null;
+  dayInput.value=todayKey();
+
+  if(API){modeDot.className='dot';modeTxt.textContent='التقييمات تُرسل إلى سجل المدرسة';}
+  else{modeDot.className='dot local';modeTxt.textContent='لم يُربَط السجل بعد — الحفظ على هذا الجهاز';}
+
+  CRITERIA.forEach(function(label,i){
+    var row=document.createElement('div'); row.className='crit';
+    var chips=SCALE.map(function(s){
+      return '<label class="chip"><input type="radio" name="c'+i+'" id="c'+i+'v'+s.v+'" value="'+s.v+'">'+
+             '<s>'+ar(s.v)+'</s><em>'+s.l+'</em></label>';
+    }).join('');
+    row.innerHTML='<div class="crit-h"><span class="num">'+ar(i+1)+'</span>'+
+      '<span class="crit-t">'+label+'</span>'+
+      '<span class="crit-v" id="v'+i+'">لم يُقيَّم</span></div>'+
+      '<div class="scale">'+chips+'</div>';
+    critBox.appendChild(row);
+  });
+
+  function answers(){
+    return CRITERIA.map(function(_,i){
+      var el=form.querySelector('input[name="c'+i+'"]:checked');
+      return el?+el.value:0;
+    });
+  }
+  function refresh(){
+    var a=answers(), total=0, missing=0;
+    a.forEach(function(v,i){
+      total+=v;
+      var cell=document.getElementById('v'+i);
+      if(v){cell.innerHTML='<b>'+ar(v)+'</b> من ١٠';}
+      else{cell.textContent='لم يُقيَّم';missing++;}
+    });
+    totalNum.textContent=ar(total);
+    formMsg.className='msg';
+    if(missing)formMsg.textContent='بقي '+ar(missing)+' من المعايير لم تُقيَّم';
+    else if(!teacher.value.trim())formMsg.textContent='اكتب اسمك لإتمام الإرسال';
+    else formMsg.textContent='التقييم جاهز للإرسال — المجموع '+ar(total)+' من ١٠٠';
+    return{a:a,total:total,missing:missing};
+  }
+  form.addEventListener('change',refresh);
+  form.addEventListener('input',refresh);
+
+  /* ---------- هوية الجهاز والحفظ المحلي لتقييم المعلم نفسه ---------- */
+  function meSeed(){
+    var s='';
+    try{s=localStorage.getItem(LS+':me')||'';}catch(e){}
+    if(!s){s='m'+Math.random().toString(36).slice(2,12);try{localStorage.setItem(LS+':me',s);}catch(e){}}
+    return s;
+  }
+  function docId(){return 'ev-'+dayInput.value+'-'+meSeed();}
+  function mineRead(){try{var r=JSON.parse(localStorage.getItem(LS+':mine')||'[]');return Array.isArray(r)?r:[];}catch(e){return[];}}
+  function mineWrite(r){try{localStorage.setItem(LS+':mine',JSON.stringify(r));}catch(e){}}
+  function mineFor(day){
+    var all=mineRead();
+    for(var i=0;i<all.length;i++){if(all[i].day===day)return all[i];}
+    return null;
+  }
+  function mineSave(rec){
+    var all=mineRead().filter(function(r){return r.day!==rec.day;});
+    all.push(rec);mineWrite(all);
+  }
+
+  function showMine(){
+    var r=mineFor(dayInput.value);
+    if(!r){mineBox.hidden=true;return;}
+    var g=grade(r.total||0);
+    mineBox.hidden=false;
+    mineBox.innerHTML='<h3>نتيجتك في إذاعة '+prettyDay(r.day)+'</h3>'+
+      '<span class="sc">'+ar(r.total||0)+' <span style="font-size:.85rem;font-family:var(--body);color:var(--muted)">من ١٠٠</span></span> '+
+      '<span class="pill std" data-g="'+g.g+'">'+g.t+'</span>'+
+      (r.sent===false?'<p style="margin-top:8px;font-size:.8rem;color:var(--g5)">لم يصل إلى سجل المدرسة بعد — افتح الصفحة وأعد الإرسال.</p>':'');
+  }
+
+  function prefillMine(){
+    var r=mineFor(dayInput.value);
+    if(!r){submitBtn.textContent='إرسال التقييم';showMine();return;}
+    teacher.value=r.teacher||'';
+    if(r.school)school.value=r.school;
+    if(r.topic)topic.value=r.topic;
+    notes.value=r.notes||'';
+    (r.scores||[]).forEach(function(v,i){
+      var el=document.getElementById('c'+i+'v'+v); if(el)el.checked=true;
+    });
+    submitBtn.textContent='تحديث تقييمي';
+    showMine();refresh();
+  }
+
+  function say(msg,ok){
+    toast.hidden=false;
+    toast.className=ok?'toast':'toast bad';
+    toast.innerHTML='<span class="txt">'+esc(msg)+'</span>';
+  }
+
+  /* ---------- الإرسال ---------- */
+  function send(rec){
+    if(!API)return Promise.reject(new Error('no-api'));
+    return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify(rec)}).then(function(res){return res.json();})
+      .then(function(out){if(!out||!out.ok)throw new Error((out&&out.error)||'failed');return out;});
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var st=refresh();
+    if(!teacher.value.trim()){
+      teacher.focus();formMsg.className='msg err';formMsg.textContent='اكتب اسمك أولًا';return;
+    }
+    if(st.missing){
+      formMsg.className='msg err';
+      formMsg.textContent='بقي '+ar(st.missing)+' من المعايير — قيِّمها كلها قبل الإرسال';
+      for(var i=0;i<CRITERIA.length;i++){
+        if(!st.a[i]){var el=document.getElementById('v'+i);
+          if(el)el.scrollIntoView({block:'center',behavior:'smooth'});break;}
+      }
+      return;
+    }
+    var rec={id:docId(),teacher:teacher.value.trim(),school:school.value.trim(),
+      topic:topic.value.trim(),day:dayInput.value,scores:st.a,total:st.total,
+      notes:notes.value.trim(),at:new Date().toISOString()};
+    submitBtn.disabled=true;submitBtn.textContent='جارٍ الإرسال…';
+    function finish(sent){
+      rec.sent=sent;mineSave(rec);showMine();
+      submitBtn.disabled=false;submitBtn.textContent='تحديث تقييمي';
+      if(sent)say('تم تسجيل تقييمك — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
+      else say('تم حفظ تقييمك على هذا الجهاز فقط — تعذّر الوصول إلى سجل المدرسة. تأكد من الاتصال وأعد الإرسال.',false);
+    }
+    if(!API){finish(false);return;}
+    send(rec).then(function(){finish(true);}).catch(function(){finish(false);});
+  });
+
+  dayInput.addEventListener('change',function(){
+    CRITERIA.forEach(function(_,i){
+      var el=form.querySelector('input[name="c'+i+'"]:checked');if(el)el.checked=false;
+    });
+    notes.value='';topic.value='';toast.hidden=true;
+    prefillMine();refresh();
+  });
+
+  /* ---------- دخول المشرف ---------- */
+  lockBtn.addEventListener('click',function(){
+    lockForm.hidden=!lockForm.hidden;
+    if(!lockForm.hidden)adminKey.focus();
+  });
+  lockForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    var k=adminKey.value.trim();
+    if(!k)return;
+    if(!API){note('لم يُربَط السجل بجوجل شيت بعد.',false);return;}
+    lockGo.disabled=true;lockGo.textContent='جارٍ التحقق…';
+    fetch(API+'?key='+encodeURIComponent(k))
+      .then(function(r){return r.json();})
+      .then(function(out){
+        lockGo.disabled=false;lockGo.textContent='دخول';
+        if(!out||!out.ok){note('الرمز غير صحيح.',false);return;}
+        key=k;isAdmin=true;records=out.rows||[];
+        try{sessionStorage.setItem(LS+':key',k);}catch(e){}
+        lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
+        tabsBox.hidden=false;renderDash();show('dash');
+      })
+      .catch(function(){
+        lockGo.disabled=false;lockGo.textContent='دخول';
+        note('تعذّر الاتصال بالسجل.',false);
+      });
+  });
+  function note(msg,ok){
+    lockMsg.hidden=false;lockMsg.textContent=msg;
+    lockMsg.style.color=ok?'var(--accent)':'var(--g5)';
+  }
+  function reload(){
+    if(!isAdmin||!API)return Promise.resolve();
+    return fetch(API+'?key='+encodeURIComponent(key)).then(function(r){return r.json();})
+      .then(function(out){if(out&&out.ok){records=out.rows||[];renderDash();}});
+  }
+
+  /* ---------- التبويبات ---------- */
+  function show(which){
+    var f=which==='form';
+    tabForm.setAttribute('aria-selected',f?'true':'false');
+    tabDash.setAttribute('aria-selected',f?'false':'true');
+    panelForm.hidden=!f;panelDash.hidden=f;
+    if(!f)window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabForm.addEventListener('click',function(){show('form');});
+  tabDash.addEventListener('click',function(){show('dash');});
+
+  /* ---------- لوحة النتائج ---------- */
+  function days(){
+    var seen={},out=[];
+    records.forEach(function(r){if(r.day&&!seen[r.day]){seen[r.day]=1;out.push(r.day);}});
+    return out.sort().reverse();
+  }
+  function forDay(d){
+    return records.filter(function(r){return d==='all'||r.day===d;})
+      .slice().sort(function(x,y){return (y.total||0)-(x.total||0);});
+  }
+  function topicOf(d){
+    var best='',t=0;
+    records.forEach(function(r){
+      if(r.day!==d||!r.topic)return;
+      var when=Date.parse(r.at||'')||0;
+      if(when>=t){t=when;best=r.topic;}
+    });
+    return best;
+  }
+  function avgOf(rows){
+    if(!rows.length)return 0;
+    return rows.reduce(function(s,r){return s+(r.total||0);},0)/rows.length;
+  }
+
+  function renderDash(){
+    if(!isAdmin){panelDash.innerHTML='';tabCount.textContent='';return;}
+    var all=days();
+    tabCount.textContent=records.length?'('+ar(records.length)+')':'';
+    if(!records.length){
+      panelDash.innerHTML='<section class="card"><div class="card-h"><h2>لوحة النتائج</h2>'+
+        '<button type="button" class="ghost" id="reloadBtn">تحديث</button></div>'+
+        '<div class="card-b"><div class="empty"><span class="ico">◠</span>لا توجد تقييمات بعد.<br>'+
+        'بعد أن يرسل أول معلم تقييمه يظهر هنا المتوسط العام وتفاصيل كل معلم.</div></div></section>';
+      bindReload();return;
+    }
+    if(!dashDay||(dashDay!=='all'&&all.indexOf(dashDay)<0))dashDay=all[0];
+    var rows=forDay(dashDay), n=rows.length, avg=avgOf(rows), g=grade(avg);
+    var opts=all.map(function(d){
+      return '<option value="'+d+'"'+(d===dashDay?' selected':'')+'>'+prettyDay(d)+'</option>';
+    }).join('')+'<option value="all"'+(dashDay==='all'?' selected':'')+'>كل الأيام معًا</option>';
+
+    var tl=dashDay==='all'?'':topicOf(dashDay);
+    var head='<div class="dash-top">'+
+      '<label class="f" for="dashDay">اليوم المعروض<select id="dashDay">'+opts+'</select></label>'+
+      '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button>'+
+      '<button type="button" class="ghost" id="reloadBtn">تحديث</button></div>'+
+      '<p class="ttl">'+(dashDay==='all'?'<span class="ph">متوسط جميع الأيام المسجَّلة</span>':
+        (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>'))+'</p>'+
+      '<dl class="tiles">'+
+      '<div class="tile main"><dt>المتوسط العام</dt><dd>'+ar(avg.toFixed(1))+' <span class="of">من ١٠٠</span></dd>'+
+      '<span class="pill">'+g.t+'</span></div>'+
+      '<div class="tile"><dt>عدد المعلمين المقيّمين</dt><dd>'+ar(n)+'</dd></div>'+
+      '<div class="tile"><dt>أعلى تقييم</dt><dd>'+ar(rows[0].total||0)+'</dd></div>'+
+      '<div class="tile"><dt>أدنى تقييم</dt><dd>'+ar(rows[n-1].total||0)+'</dd></div></dl>';
+
+    var bars=CRITERIA.map(function(label,i){
+      var v=rows.reduce(function(s,r){return s+((r.scores&&r.scores[i])||0);},0)/n;
+      return '<div class="row-c"><span class="t">'+ar(i+1)+'. '+esc(label)+'</span>'+
+        '<span class="v">'+ar(v.toFixed(1))+' / ١٠</span>'+
+        '<span class="track"><span class="fill" style="width:'+(v*10).toFixed(1)+'%"></span></span></div>';
+    }).join('');
+
+    var cards=rows.map(function(r){
+      var rg=grade(r.total||0);
+      var lines=CRITERIA.map(function(label,i){
+        var v=(r.scores&&r.scores[i])||0;
+        return '<div class="tline"><span class="i">'+ar(i+1)+'</span><span class="t">'+esc(label)+'</span>'+
+          '<span class="v" style="color:var(--'+markColor(v)+')">'+ar(v)+' / ١٠</span></div>';
+      }).join('');
+      return '<details class="tcard"><summary><span class="nm">'+esc(r.teacher||'—')+
+        '<small>'+prettyDay(r.day)+(r.topic?' · '+esc(r.topic):'')+'</small></span>'+
+        '<span class="sc" style="color:var(--'+rg.g+')">'+ar(r.total||0)+' <span>من ١٠٠</span></span>'+
+        '<span class="caret">▼</span></summary><div class="tdetail">'+lines+
+        (r.notes?'<div class="tnote"><b>ملاحظات المعلم</b>'+esc(r.notes)+'</div>':'')+
+        '<div><span class="pill std" data-g="'+rg.g+'">التقدير: '+rg.t+'</span></div></div></details>';
+    }).join('');
+
+    var daysTbl=all.map(function(d){
+      var rr=forDay(d), a=avgOf(rr), dg=grade(a), t=topicOf(d);
+      return '<tr><td>'+prettyDay(d)+'</td><td class="wrap">'+(t?esc(t):'—')+'</td>'+
+        '<td class="sc">'+ar(rr.length)+'</td><td class="sc">'+ar(a.toFixed(1))+'</td>'+
+        '<td class="sc" style="color:var(--'+dg.g+')">'+dg.t+'</td></tr>';
+    }).join('');
+
+    panelDash.innerHTML=
+      '<section class="card"><div class="card-h"><h2>المتوسط العام</h2>'+
+        '<span class="note">من سجل المدرسة في جوجل شيت</span></div>'+
+        '<div class="card-b">'+head+'</div></section>'+
+      '<section class="card"><div class="card-h"><h2>متوسط كل معيار</h2>'+
+        '<span class="note">كل معيار من ١٠ درجات</span></div>'+
+        '<div class="card-b"><div class="rows">'+bars+'</div></div></section>'+
+      '<section class="card"><div class="card-h"><h2>نتيجة كل معلم</h2>'+
+        '<span class="note">اضغط على اسم المعلم لعرض درجاته التفصيلية</span></div>'+
+        '<div class="card-b"><div class="tcards">'+cards+'</div></div></section>'+
+      '<section class="card"><div class="card-h"><h2>سجل الأيام</h2>'+
+        '<span class="note">متوسط كل إذاعة على حدة</span></div>'+
+        '<div class="card-b"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>عنوان الإذاعة</th>'+
+        '<th>المقيّمون</th><th>المتوسط</th><th>التقدير</th></tr></thead><tbody>'+daysTbl+
+        '</tbody></table></div></div></section>';
+
+    var sel=document.getElementById('dashDay');
+    if(sel)sel.addEventListener('change',function(){dashDay=sel.value;renderDash();});
+    var csv=document.getElementById('csvBtn');
+    if(csv)csv.addEventListener('click',function(){exportCsv(rows,dashDay);});
+    bindReload();
+  }
+  function bindReload(){
+    var b=document.getElementById('reloadBtn');
+    if(!b)return;
+    b.addEventListener('click',function(){
+      b.disabled=true;b.textContent='جارٍ التحديث…';
+      reload().then(function(){}).catch(function(){}).then(function(){
+        var nb=document.getElementById('reloadBtn');
+        if(nb){nb.disabled=false;nb.textContent='تحديث';}
+      });
+    });
+  }
+
+  function exportCsv(rows,day){
+    var head=['المعلم','المدرسة','التاريخ','عنوان الإذاعة']
+      .concat(CRITERIA.map(function(l,i){return (i+1)+'. '+l;}))
+      .concat(['المجموع من 100','التقدير','الملاحظات']);
+    var lines=[head].concat(rows.map(function(r){
+      return [r.teacher||'',r.school||'',r.day||'',r.topic||'']
+        .concat(CRITERIA.map(function(_,i){return (r.scores&&r.scores[i])||0;}))
+        .concat([r.total||0,grade(r.total||0).t,String(r.notes||'').replace(/\r?\n/g,' ')]);
+    }));
+    var a=avgOf(rows);
+    lines.push([]);
+    lines.push(['المتوسط العام',a.toFixed(1)+' من 100','التقدير',grade(a).t,'عدد المقيّمين',rows.length]);
+    var text='﻿'+lines.map(function(r){
+      return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');
+    }).join('\r\n');
+    var url=URL.createObjectURL(new Blob([text],{type:'text/csv;charset=utf-8'}));
+    var a2=document.createElement('a');
+    a2.href=url;a2.download='نتائج-تقييم-الإذاعة-'+(day==='all'?'كل-الأيام':day)+'.csv';
+    document.body.appendChild(a2);a2.click();document.body.removeChild(a2);
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  }
+
+  /* ---------- البداية ---------- */
+  refresh();
+  prefillMine();
+  var saved='';
+  try{saved=sessionStorage.getItem(LS+':key')||'';}catch(e){}
+  if(saved&&API){
+    fetch(API+'?key='+encodeURIComponent(saved)).then(function(r){return r.json();}).then(function(out){
+      if(out&&out.ok){
+        key=saved;isAdmin=true;records=out.rows||[];
+        lockBtn.hidden=true;tabsBox.hidden=false;renderDash();
+      }
+    }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
