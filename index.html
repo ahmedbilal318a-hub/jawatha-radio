@@ -348,8 +348,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
 
 <script>
 (function(){
-  /* رمز دخول لوحة النتائج — غيّره وقت ما تحب */
-  var ADMIN_PASS='Edhaa7421';
+  /* بصمة رمز دخول لوحة النتائج (SHA-256) — الرمز نفسه غير موجود في الصفحة */
+  var ADMIN_HASH='3da062684acbbec40006c42d67a6062512eb8782df44e1d2f90fb4c28e4cd4f8';
 
   var CRITERIA=[
     'الالتزام بالوقت والتنظيم',
@@ -589,15 +589,32 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     lockForm.hidden=!lockForm.hidden;
     if(!lockForm.hidden)adminKey.focus();
   });
-  lockForm.addEventListener('submit',function(e){
-    e.preventDefault();
-    if(adminKey.value.trim()!==ADMIN_PASS){
-      lockMsg.hidden=false;lockMsg.textContent='الرمز غير صحيح.';lockMsg.style.color='var(--g5)';return;
-    }
+  function sha256Hex(txt){
+    if(!(window.crypto&&window.crypto.subtle))return Promise.resolve('');
+    return window.crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf),function(b){
+        return ('0'+b.toString(16)).slice(-2);}).join('');
+    }).catch(function(){return '';});
+  }
+  function lockBad(msg){
+    lockMsg.hidden=false;lockMsg.textContent=msg;lockMsg.style.color='var(--g5)';
+  }
+  function enterAdmin(){
     isAdmin=true;
     try{sessionStorage.setItem(LS+':admin','1');}catch(err){}
     lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
     tabsBox.hidden=false;flushPending();renderDash();show('dash');
+  }
+  lockForm.addEventListener('submit',function(e){
+    e.preventDefault();
+    var p=adminKey.value.trim();
+    if(!p)return;
+    sha256Hex('jawatha-radio|'+p).then(function(h){
+      if(!h){lockBad('افتح الموقع من رابطه للتحقق من الرمز.');return;}
+      if(h!==ADMIN_HASH){lockBad('الرمز غير صحيح.');return;}
+      adminKey.value='';
+      enterAdmin();
+    });
   });
 
   /* ---------- لوحة النتائج ---------- */
