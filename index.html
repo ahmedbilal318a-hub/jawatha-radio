@@ -278,14 +278,17 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         <div id="toast" hidden></div>
         <form id="form" novalidate>
           <div class="fields">
-            <label class="f" for="teacher">اسم المعلم المقيِّم
-              <input type="text" id="teacher" name="teacher" placeholder="الاسم الكامل" autocomplete="name">
+            <label class="f" for="teacher">المعلم المُقيِّم
+              <input type="text" id="teacher" name="teacher" placeholder="اسم المعلم الكامل" autocomplete="name">
+            </label>
+            <label class="f" for="klass">الفصل المُقيَّم
+              <input type="text" id="klass" name="klass" placeholder="مثال: السادس / أ">
             </label>
             <label class="f" for="day">تاريخ الإذاعة
               <input type="date" id="day" name="day">
             </label>
             <label class="f wide" for="topic">عنوان الإذاعة
-              <input type="text" id="topic" name="topic" placeholder="مثال: إذاعة عن بر الوالدين — الصف السادس">
+              <input type="text" id="topic" name="topic" placeholder="مثال: إذاعة عن بر الوالدين">
             </label>
           </div>
 
@@ -390,6 +393,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       totalNum=document.getElementById('totalNum'), formMsg=document.getElementById('formMsg'),
       submitBtn=document.getElementById('submitBtn'), dayInput=document.getElementById('day'),
       teacher=document.getElementById('teacher'), topic=document.getElementById('topic'),
+      klass=document.getElementById('klass'),
       notes=document.getElementById('notes'), toast=document.getElementById('toast'),
       result=document.getElementById('result'), resSc=document.getElementById('resSc'),
       resPill=document.getElementById('resPill'), codeTxt=document.getElementById('codeTxt'),
@@ -435,7 +439,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     totalNum.textContent=ar(total);
     formMsg.className='msg';
     if(missing)formMsg.textContent='بقي '+ar(missing)+' من المعايير لم تُقيَّم';
-    else if(!teacher.value.trim())formMsg.textContent='اكتب اسمك لإتمام التقييم';
+    else if(!teacher.value.trim())formMsg.textContent='اكتب اسم المعلم المقيِّم لإتمام التقييم';
+    else if(!klass.value.trim())formMsg.textContent='اكتب الفصل المقيَّم لإتمام التقييم';
     else formMsg.textContent='التقييم مكتمل — المجموع '+ar(total)+' من ١٠٠';
     return{a:a,total:total,missing:missing};
   }
@@ -445,7 +450,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   /* ---------- رمز التقييم ---------- */
   function encode(rec){
     var digits=rec.scores.map(function(v){return String(v/2);}).join('');
-    return ['JW1',rec.day,digits,clean(rec.teacher),clean(rec.topic),clean(rec.notes)].join('|');
+    return ['JW1',rec.day,digits,clean(rec.teacher),clean(rec.topic),clean(rec.notes),clean(rec.klass)].join('|');
   }
   function decode(line){
     var p=String(line||'').trim().split('|');
@@ -455,7 +460,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var scores=p[2].split('').map(function(d){return (+d)*2;});
     var total=scores.reduce(function(s,v){return s+v;},0);
     return {day:p[1],scores:scores,total:total,teacher:(p[3]||'').trim(),
-      topic:(p[4]||'').trim(),notes:(p[5]||'').trim()};
+      topic:(p[4]||'').trim(),notes:(p[5]||'').trim(),klass:(p[6]||'').trim()};
   }
 
   var shareText='', shareLink='';
@@ -468,7 +473,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var code=encode(rec);
     codeTxt.textContent=code;
     shareLink=location.origin+location.pathname+'#r='+encodeURIComponent(code);
-    shareText='تقييم الإذاعة — '+rec.day+'\n'+rec.teacher+' — المجموع '+rec.total+' من 100 ('+g.t+')\n'+shareLink;
+    shareText='تقييم الإذاعة — '+rec.day+(rec.klass?' — الفصل '+rec.klass:'')+'\n'+rec.teacher+' — المجموع '+rec.total+' من 100 ('+g.t+')\n'+shareLink;
     result.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
 
@@ -529,7 +534,10 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     e.preventDefault();
     var st=refresh();
     if(!teacher.value.trim()){
-      teacher.focus();formMsg.className='msg err';formMsg.textContent='اكتب اسمك أولًا';return;
+      teacher.focus();formMsg.className='msg err';formMsg.textContent='اكتب اسم المعلم المقيِّم أولًا';return;
+    }
+    if(!klass.value.trim()){
+      klass.focus();formMsg.className='msg err';formMsg.textContent='اكتب الفصل المقيَّم أولًا';return;
     }
     if(st.missing){
       formMsg.className='msg err';
@@ -540,7 +548,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       }
       return;
     }
-    var rec={teacher:teacher.value.trim(),topic:topic.value.trim(),day:dayInput.value,
+    var rec={teacher:teacher.value.trim(),klass:klass.value.trim(),topic:topic.value.trim(),day:dayInput.value,
       scores:st.a,total:st.total,notes:notes.value.trim()};
     addRows([rec]);
     say('تم تسجيل تقييم '+rec.teacher+' — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
@@ -552,7 +560,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     CRITERIA.forEach(function(_,i){
       var el=form.querySelector('input[name="c'+i+'"]:checked');if(el)el.checked=false;
     });
-    notes.value='';topic.value='';toast.hidden=true;result.hidden=true;
+    notes.value='';topic.value='';klass.value='';toast.hidden=true;result.hidden=true;
     submitBtn.textContent='اعتماد التقييم';refresh();
   });
 
@@ -632,6 +640,11 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     records.forEach(function(r){if(r.day===d&&r.topic)best=r.topic;});
     return best;
   }
+  function classOf(d){
+    var best='';
+    records.forEach(function(r){if(r.day===d&&r.klass)best=r.klass;});
+    return best;
+  }
   function avgOf(rows){
     if(!rows.length)return 0;
     return rows.reduce(function(s,r){return s+(r.total||0);},0)/rows.length;
@@ -641,7 +654,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     return '<section class="card"><div class="card-h"><h2>إضافة رموز المعلمين</h2>'+
       '<span class="note">كل رمز في سطر</span></div><div class="card-b">'+
       '<label class="f" for="pasteBox">الصق الرموز التي وصلتك على واتساب'+
-      '<textarea id="pasteBox" style="min-height:92px" placeholder="JW1|2026-10-24|4535242314|اسم المعلم|عنوان الإذاعة|ملاحظة"></textarea></label>'+
+      '<textarea id="pasteBox" style="min-height:92px" placeholder="JW1|2026-10-24|4535242314|اسم المعلم|عنوان الإذاعة|ملاحظة|الفصل"></textarea></label>'+
       '<div class="actions" style="margin-top:10px"><button type="button" class="go" id="pasteGo">إضافة إلى النتائج</button>'+
       '<button type="button" class="ghost" id="clearAll">مسح كل السجل</button></div>'+
       '<p class="hint" id="pasteMsg" style="margin-top:9px'+(flushNote?';color:var(--accent)':'')+'">'+
@@ -694,12 +707,13 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       return '<option value="'+d+'"'+(d===dashDay?' selected':'')+'>'+prettyDay(d)+'</option>';
     }).join('')+'<option value="all"'+(dashDay==='all'?' selected':'')+'>كل الأيام معًا</option>';
 
-    var tl=dashDay==='all'?'':topicOf(dashDay);
+    var tl=dashDay==='all'?'':topicOf(dashDay), cl=dashDay==='all'?'':classOf(dashDay);
     var pick='<div class="dash-top">'+
       '<label class="f" for="dashDay">اليوم المعروض<select id="dashDay">'+opts+'</select></label>'+
       '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button></div>'+
       '<p class="ttl">'+(dashDay==='all'?'<span class="ph">كل الأيام المسجَّلة</span>':
-        (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>'))+'</p>';
+        (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>')+
+        (cl?' <span class="ph">· الفصل المقيَّم: '+esc(cl)+'</span>':''))+'</p>';
     var tiles='<dl class="tiles">'+
       '<div class="tile main"><dt>المتوسط العام</dt><dd>'+ar(avg.toFixed(1))+' <span class="of">من ١٠٠</span></dd>'+
       '<span class="pill">'+g.t+'</span></div>'+
@@ -722,7 +736,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
           '<span class="v" style="color:var(--'+markColor(v)+')">'+ar(v)+' / ١٠</span></div>';
       }).join('');
       return '<details class="tcard"><summary><span class="nm">'+esc(r.teacher||'—')+
-        '<small>'+prettyDay(r.day)+(r.topic?' · '+esc(r.topic):'')+'</small></span>'+
+        '<small>'+prettyDay(r.day)+(r.klass?' · الفصل '+esc(r.klass):'')+(r.topic?' · '+esc(r.topic):'')+'</small></span>'+
         '<span class="sc" style="color:var(--'+rg.g+')">'+ar(r.total||0)+' <span>من ١٠٠</span></span>'+
         '<span class="caret">▼</span></summary><div class="tdetail">'+lines+
         (r.notes?'<div class="tnote"><b>ملاحظات المعلم</b>'+esc(r.notes)+'</div>':'')+
@@ -733,8 +747,8 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     }).join('');
 
     var daysTbl=all.map(function(d){
-      var rr=forDay(d), a=avgOf(rr), dg=grade(a), t=topicOf(d);
-      return '<tr><td>'+prettyDay(d)+'</td><td class="wrap">'+(t?esc(t):'—')+'</td>'+
+      var rr=forDay(d), a=avgOf(rr), dg=grade(a), t=topicOf(d), c=classOf(d);
+      return '<tr><td>'+prettyDay(d)+'</td><td>'+(c?esc(c):'—')+'</td><td class="wrap">'+(t?esc(t):'—')+'</td>'+
         '<td class="sc">'+ar(rr.length)+'</td><td class="sc">'+ar(a.toFixed(1))+'</td>'+
         '<td class="sc" style="color:var(--'+dg.g+')">'+dg.t+'</td></tr>';
     }).join('');
@@ -751,7 +765,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
         '<div class="card-b"><div class="rows">'+bars+'</div></div></section>'+
       '<section class="card"><div class="card-h"><h2>سجل الأيام</h2>'+
         '<span class="note">متوسط كل إذاعة على حدة</span></div>'+
-        '<div class="card-b"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>عنوان الإذاعة</th>'+
+        '<div class="card-b"><div class="tbl-wrap"><table><thead><tr><th>التاريخ</th><th>الفصل المقيَّم</th><th>عنوان الإذاعة</th>'+
         '<th>المقيّمون</th><th>المتوسط</th><th>التقدير</th></tr></thead><tbody>'+daysTbl+
         '</tbody></table></div></div></section>'+pasteCard();
 
@@ -770,11 +784,11 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   }
 
   function exportCsv(rows,day){
-    var head=['المعلم','التاريخ','عنوان الإذاعة']
+    var head=['المعلم المقيِّم','الفصل المقيَّم','التاريخ','عنوان الإذاعة']
       .concat(CRITERIA.map(function(l,i){return (i+1)+'. '+l;}))
       .concat(['المجموع من 100','التقدير','الملاحظات']);
     var lines=[head].concat(rows.map(function(r){
-      return [r.teacher||'',r.day||'',r.topic||'']
+      return [r.teacher||'',r.klass||'',r.day||'',r.topic||'']
         .concat(CRITERIA.map(function(_,i){return (r.scores&&r.scores[i])||0;}))
         .concat([r.total||0,grade(r.total||0).t,String(r.notes||'').replace(/\r?\n/g,' ')]);
     }));
