@@ -353,6 +353,9 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
 (function(){
   /* بصمة رمز دخول لوحة النتائج (SHA-256) — الرمز نفسه غير موجود في الصفحة */
   var ADMIN_HASH='3da062684acbbec40006c42d67a6062512eb8782df44e1d2f90fb4c28e4cd4f8';
+  /* رابط تطبيق جوجل شيت (ينتهي بـ /exec) — كل تقييم يُرسل إليه تلقائيًا ولوحة المشرف تقرأ منه.
+     إذا تُرك فارغًا تعمل الصفحة على الجهاز الواحد وبالرموز كما كانت */
+  var API='';
 
   var CRITERIA=[
     'الالتزام بالوقت والتنظيم',
@@ -400,13 +403,15 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       shareBtn=document.getElementById('shareBtn'), linkBtn=document.getElementById('linkBtn'),
       copyBtn=document.getElementById('copyBtn'), editBtn=document.getElementById('editBtn'),
       nextBtn=document.getElementById('nextBtn'), resWho=document.getElementById('resWho'),
+      resHint=document.getElementById('resHint'),
       tabCount=document.getElementById('tabCount'), tabForm=document.getElementById('tabForm'),
       tabDash=document.getElementById('tabDash'), panelForm=document.getElementById('panelForm'),
       panelDash=document.getElementById('panelDash'), tabsBox=document.getElementById('tabs'),
       lockBtn=document.getElementById('lockBtn'), lockForm=document.getElementById('lockForm'),
       adminKey=document.getElementById('adminKey'), lockMsg=document.getElementById('lockMsg');
 
-  var LS='jawatha-radio', records=[], isAdmin=false, dashDay=null, flushNote='';
+  var LS='jawatha-radio', records=[], isAdmin=false, dashDay=null, flushNote='',
+      adminPass='', syncNote='';
   dayInput.value=todayKey();
 
   CRITERIA.forEach(function(label,i){
@@ -551,6 +556,15 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var rec={teacher:teacher.value.trim(),klass:klass.value.trim(),topic:topic.value.trim(),day:dayInput.value,
       scores:st.a,total:st.total,notes:notes.value.trim()};
     addRows([rec]);
+    if(API){
+      resHint.textContent='جارٍ إرسال التقييم إلى المشرف…';
+      send(rec).then(function(left){
+        resHint.textContent=left?'تعذّر إرسال بعض التقييمات الآن — ستُعاد تلقائيًا عند الاتصال بالإنترنت.':
+          'وصل التقييم إلى المشرف تلقائيًا ✓ — لا حاجة لإرسال أي شيء.';
+      },function(){
+        resHint.textContent='لم يُرسل التقييم الآن (تأكد من الإنترنت) — محفوظ على الجهاز وسيُرسل تلقائيًا عند الاتصال.';
+      });
+    }
     say('تم تسجيل تقييم '+rec.teacher+' — المجموع '+ar(st.total)+' من ١٠٠، والتقدير: '+grade(st.total).t+'.',true);
     submitBtn.textContent='تحديث التقييم';
     showResult(rec);
@@ -582,6 +596,68 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     return{added:added,updated:updated};
   }
 
+  /* ---------- الإرسال إلى جوجل شيت ---------- */
+  function outRead(){try{var r=JSON.parse(localStorage.getItem(LS+':out')||'[]');return Array.isArray(r)?r:[];}catch(e){return[];}}
+  function outWrite(r){try{localStorage.setItem(LS+':out',JSON.stringify(r));}catch(e){}}
+  function api(body){
+    /* بدون Content-Type حتى يُرسل كنص عادي فلا يحتاج جوجل إلى طلب إذن مسبق */
+    return fetch(API,{method:'POST',body:JSON.stringify(body)})
+      .then(function(r){return r.json();})
+      .then(function(j){if(!j||!j.ok)throw new Error(j&&j.error||'fail');return j;});
+  }
+  function withId(rec){var o={id:keyOf(rec)};for(var k in rec)o[k]=rec[k];return o;}
+  function send(rec){
+    var q=outRead().filter(function(r){return keyOf(r)!==keyOf(rec);});
+    q.push(rec);outWrite(q);
+    return flushOut();
+  }
+  var sending=null;
+  function flushOut(){
+    if(!API)return Promise.resolve(0);
+    if(sending)return sending;
+    var q=outRead();
+    if(!q.length)return Promise.resolve(0);
+    sending=q.reduce(function(p,rec){
+      return p.then(function(){return api(withId(rec)).then(function(){
+        var s=JSON.stringify(rec);
+        outWrite(outRead().filter(function(r){return JSON.stringify(r)!==s;}));
+      });});
+    },Promise.resolve()).then(function(){sending=null;return outRead().length;},
+      function(e){sending=null;throw e;});
+    return sending;
+  }
+
+  /* لوحة المشرف تقرأ كل التقييمات من الشيت وتدمجها مع المحفوظ على الجهاز */
+  function setSync(msg){syncNote=msg;var el=document.getElementById('syncMsg');if(el)el.textContent=msg;}
+  function pull(){
+    if(!API||!isAdmin||!adminPass)return Promise.resolve();
+    setSync('جارٍ جلب التقييمات من الشيت…');
+    return fetch(API+'?key='+encodeURIComponent(adminPass))
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(!j||!j.ok)throw new Error(j&&j.error||'fail');
+        var map={},changed=false;
+        records.forEach(function(r){map[keyOf(r)]=r;});
+        (j.rows||[]).forEach(function(x){
+          if(!x.day||!x.teacher)return;
+          var r={day:x.day,teacher:x.teacher,klass:x.klass||'',topic:x.topic||'',
+            scores:x.scores||[],total:+x.total||0,notes:x.notes||''};
+          var k=keyOf(r);
+          if(!map[k]||JSON.stringify(map[k])!==JSON.stringify(r)){map[k]=r;changed=true;}
+        });
+        if(changed){records=Object.keys(map).map(function(k){return map[k];});rowsWrite(records);renderDash();}
+        setSync('آخر تحديث من الشيت: '+new Date().toLocaleTimeString('ar-u-nu-arab',{hour:'numeric',minute:'2-digit'})+
+          ' — يتحدّث تلقائيًا كل نصف دقيقة.');
+      })
+      .catch(function(e){
+        setSync(String(e&&e.message)==='unauthorized'?
+          'الشيت رفض رمز المشرف — اجعل ADMIN_KEY في السكربت مطابقًا لرمز دخول المشرف.':
+          'تعذّر الاتصال بالشيت — المعروض هو المحفوظ على هذا الجهاز.');
+      });
+  }
+  setInterval(function(){if(isAdmin&&!panelDash.hidden&&!document.hidden)pull();},30000);
+  window.addEventListener('online',function(){flushOut().catch(function(){});});
+
   /* ---------- التبويبات ---------- */
   function show(which){
     var f=which==='form';
@@ -607,11 +683,11 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   function lockBad(msg){
     lockMsg.hidden=false;lockMsg.textContent=msg;lockMsg.style.color='var(--g5)';
   }
-  function enterAdmin(){
-    isAdmin=true;
-    try{sessionStorage.setItem(LS+':admin','1');}catch(err){}
+  function enterAdmin(p){
+    isAdmin=true;adminPass=p;
+    try{sessionStorage.setItem(LS+':admin','1');sessionStorage.setItem(LS+':key',p);}catch(err){}
     lockForm.hidden=true;lockBtn.hidden=true;lockMsg.hidden=true;
-    tabsBox.hidden=false;flushPending();renderDash();show('dash');
+    tabsBox.hidden=false;flushPending();renderDash();show('dash');pull();
   }
   lockForm.addEventListener('submit',function(e){
     e.preventDefault();
@@ -621,7 +697,7 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
       if(!h){lockBad('افتح الموقع من رابطه للتحقق من الرمز.');return;}
       if(h!==ADMIN_HASH){lockBad('الرمز غير صحيح.');return;}
       adminKey.value='';
-      enterAdmin();
+      enterAdmin(p);
     });
   });
 
@@ -710,7 +786,9 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     var tl=dashDay==='all'?'':topicOf(dashDay), cl=dashDay==='all'?'':classOf(dashDay);
     var pick='<div class="dash-top">'+
       '<label class="f" for="dashDay">اليوم المعروض<select id="dashDay">'+opts+'</select></label>'+
-      '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button></div>'+
+      '<button type="button" class="ghost" id="csvBtn">تنزيل النتائج (ملف Excel)</button>'+
+      (API?'<button type="button" class="ghost" id="syncBtn">تحديث من الشيت</button>':'')+'</div>'+
+      (API?'<p class="hint" id="syncMsg" style="margin-top:8px">'+esc(syncNote)+'</p>':'')+
       '<p class="ttl">'+(dashDay==='all'?'<span class="ph">كل الأيام المسجَّلة</span>':
         (tl?esc(tl):'<span class="ph">لم يُكتب عنوان للإذاعة في هذا اليوم</span>')+
         (cl?' <span class="ph">· الفصل المقيَّم: '+esc(cl)+'</span>':''))+'</p>';
@@ -774,11 +852,20 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
     if(sel)sel.addEventListener('change',function(){dashDay=sel.value;renderDash();});
     var csv=document.getElementById('csvBtn');
     if(csv)csv.addEventListener('click',function(){exportCsv(rows,dashDay);});
+    var syncBtn=document.getElementById('syncBtn');
+    if(syncBtn)syncBtn.addEventListener('click',function(){pull();});
     Array.prototype.forEach.call(panelDash.querySelectorAll('.del'),function(b){
       b.addEventListener('click',function(){
         var k=b.getAttribute('data-k');
-        records=records.filter(function(r){return keyOf(r)!==k;});
-        rowsWrite(records);renderDash();
+        function drop(){
+          records=records.filter(function(r){return keyOf(r)!==k;});
+          rowsWrite(records);renderDash();
+        }
+        if(!API){drop();return;}
+        b.textContent='جارٍ الحذف من الشيت…';b.disabled=true;
+        api({action:'delete',key:adminPass,id:k}).then(drop,function(){
+          b.disabled=false;b.textContent='تعذّر الحذف من الشيت — حاول مرة أخرى';
+        });
       });
     });
   }
@@ -835,9 +922,11 @@ footer{margin-top:26px;text-align:center;font-size:.76rem;color:var(--muted);dis
   var incoming=takeHash();
   var wasAdmin='';
   try{wasAdmin=sessionStorage.getItem(LS+':admin')||'';}catch(e){}
+  flushOut().catch(function(){});
   if(wasAdmin==='1'){
     isAdmin=true;lockBtn.hidden=true;tabsBox.hidden=false;
-    flushPending();renderDash();
+    try{adminPass=sessionStorage.getItem(LS+':key')||'';}catch(e){}
+    flushPending();renderDash();pull();
     if(incoming)show('dash');
   }else if(incoming){
     say('وصلتك نتيجة تقييم من '+(incoming.teacher||'معلم')+' — ادخل كمشرف لإضافتها إلى المتوسط.',true);

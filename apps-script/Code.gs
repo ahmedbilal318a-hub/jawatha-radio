@@ -7,8 +7,8 @@
  * ثم انسخ رابط التطبيق (ينتهي بـ /exec) وضعه في index.html في المتغير API.
  */
 
-/* غيّر هذا الرمز — هو كلمة مرور لوحة النتائج */
-var ADMIN_KEY = 'jawatha2026';
+/* اكتب هنا نفس رمز دخول المشرف في الموقع — داخل Apps Script فقط، لا ترفعه إلى GitHub */
+var ADMIN_KEY = 'ضع-رمز-المشرف-هنا';
 
 var SHEET_NAME = 'التقييمات';
 
@@ -24,7 +24,7 @@ var HEADERS = [
   '8. مشاركة الطلاب وتوزيع الأدوار',
   '9. استخدام الوسائل والتقنيات المناسبة',
   '10. التأثير في الجمهور وترك أثر إيجابي',
-  'المجموع من 100','الملاحظات'
+  'المجموع من 100','الملاحظات','الفصل المقيَّم'
 ];
 
 function sheet_() {
@@ -35,6 +35,8 @@ function sheet_() {
     sh.appendRow(HEADERS);
     sh.setFrozenRows(1);
     sh.setRightToLeft(true);
+  } else if (sh.getLastColumn() < HEADERS.length) {
+    sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   }
   return sh;
 }
@@ -55,6 +57,7 @@ function rowOf_(data) {
   for (var i = 0; i < 10; i++) row.push(score_(data.scores, i));
   row.push(Number(data.total) || 0);
   row.push(data.notes || '');
+  row.push(data.klass || '');
   return row;
 }
 
@@ -65,14 +68,19 @@ function doPost(e) {
     lock.waitLock(20000);
     var data = JSON.parse(e.postData.contents);
     var sh = sheet_();
-    var row = rowOf_(data);
     var at = -1;
-    if (data.id) {
-      var ids = sh.getRange(2, 2, Math.max(sh.getLastRow() - 1, 1), 1).getValues();
+    if (data.id && sh.getLastRow() > 1) {
+      var ids = sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues();
       for (var i = 0; i < ids.length; i++) {
         if (String(ids[i][0]) === String(data.id)) { at = i + 2; break; }
       }
     }
+    if (data.action === 'delete') {
+      if (data.key !== ADMIN_KEY) return json_({ ok: false, error: 'unauthorized' });
+      if (at > 0) sh.deleteRow(at);
+      return json_({ ok: true, deleted: at > 0 });
+    }
+    var row = rowOf_(data);
     if (at > 0) sh.getRange(at, 1, 1, row.length).setValues([row]);
     else sh.appendRow(row);
     return json_({ ok: true, updated: at > 0 });
@@ -103,7 +111,7 @@ function doGet(e) {
     return {
       at: String(at), id: String(r[1]), teacher: String(r[2]), school: String(r[3]),
       day: String(day), topic: String(r[5]), scores: scores,
-      total: Number(r[16]) || 0, notes: String(r[17] || '')
+      total: Number(r[16]) || 0, notes: String(r[17] || ''), klass: String(r[18] || '')
     };
   });
   return json_({ ok: true, rows: rows });
